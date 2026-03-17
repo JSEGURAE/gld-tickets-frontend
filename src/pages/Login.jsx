@@ -4,6 +4,39 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { login } from '../api/auth'
 import useAuthStore from '../store/authStore'
 
+const breatheStyle = `
+  @keyframes breathe {
+    0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 8px rgba(139,92,246,0.6)); }
+    50%       { transform: scale(1.07); filter: drop-shadow(0 0 22px rgba(167,139,250,0.9)); }
+  }
+  @keyframes orbit {
+    from { transform: rotate(0deg)   translateX(38px) rotate(0deg); }
+    to   { transform: rotate(360deg) translateX(38px) rotate(-360deg); }
+  }
+  @keyframes orbit-rev {
+    from { transform: rotate(0deg)   translateX(28px) rotate(0deg); }
+    to   { transform: rotate(-360deg) translateX(28px) rotate(360deg); }
+  }
+  @keyframes ring-spin {
+    from { transform: rotate(0deg);   }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes ring-spin-rev {
+    from { transform: rotate(0deg);   }
+    to   { transform: rotate(-360deg);}
+  }
+  @keyframes core-pulse {
+    0%, 100% { opacity: 1;   transform: scale(1);    }
+    50%       { opacity: 0.75; transform: scale(0.93); }
+  }
+  .tech-breathe  { animation: breathe 3s ease-in-out infinite; }
+  .orbit-dot     { animation: orbit 4s linear infinite; }
+  .orbit-dot-rev { animation: orbit-rev 3s linear infinite; }
+  .ring-outer    { animation: ring-spin 8s linear infinite; }
+  .ring-inner    { animation: ring-spin-rev 5s linear infinite; }
+  .core-pulse    { animation: core-pulse 2.5s ease-in-out infinite; }
+`
+
 function GldLogo() {
   return (
     <div className="flex flex-col items-center gap-3">
@@ -95,8 +128,54 @@ export default function Login() {
             border: '1px solid rgba(255,255,255,0.13)',
           }}
         >
-          <h2 className="text-xl font-semibold text-white mb-1">Iniciar sesión</h2>
-          <p className="text-white/50 text-sm mb-7">Ingresa tus credenciales para continuar</p>
+          <style>{breatheStyle}</style>
+
+          {/* Animated tech icon */}
+          <div className="flex justify-center mb-6">
+            <div className="tech-breathe relative flex items-center justify-center" style={{ width: 96, height: 96 }}>
+
+              {/* Rotating dashed outer ring */}
+              <svg className="ring-outer absolute inset-0" width="96" height="96" viewBox="0 0 96 96">
+                <circle cx="48" cy="48" r="44" fill="none" stroke="rgba(139,92,246,0.35)"
+                  strokeWidth="1.5" strokeDasharray="6 5" strokeLinecap="round" />
+              </svg>
+
+              {/* Rotating inner ring */}
+              <svg className="ring-inner absolute inset-0" width="96" height="96" viewBox="0 0 96 96">
+                <circle cx="48" cy="48" r="34" fill="none" stroke="rgba(99,102,241,0.4)"
+                  strokeWidth="1" strokeDasharray="3 8" strokeLinecap="round" />
+              </svg>
+
+              {/* Orbiting dots */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="orbit-dot w-2 h-2 rounded-full" style={{ background: '#a78bfa' }} />
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center" style={{ animationDelay: '1.5s' }}>
+                <div className="orbit-dot-rev w-1.5 h-1.5 rounded-full" style={{ background: '#818cf8', animationDelay: '0.8s' }} />
+              </div>
+
+              {/* Core */}
+              <div className="core-pulse relative w-14 h-14 rounded-2xl flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, #6d28d9 0%, #4f46e5 60%, #7c3aed 100%)', boxShadow: '0 0 24px rgba(109,40,217,0.6)' }}>
+                {/* Circuit SVG icon */}
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="4" y="4" width="16" height="16" rx="2" />
+                  <rect x="9" y="9" width="6" height="6" />
+                  <line x1="9"  y1="2"  x2="9"  y2="4"  />
+                  <line x1="15" y1="2"  x2="15" y2="4"  />
+                  <line x1="9"  y1="20" x2="9"  y2="22" />
+                  <line x1="15" y1="20" x2="15" y2="22" />
+                  <line x1="2"  y1="9"  x2="4"  y2="9"  />
+                  <line x1="2"  y1="15" x2="4"  y2="15" />
+                  <line x1="20" y1="9"  x2="22" y2="9"  />
+                  <line x1="20" y1="15" x2="22" y2="15" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <h2 className="text-xl font-semibold text-white mb-1 text-center">Iniciar sesión</h2>
+          <p className="text-white/50 text-sm mb-7 text-center">Ingresa tus credenciales para continuar</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
 
