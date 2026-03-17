@@ -1,0 +1,227 @@
+import { useState, useEffect } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
+import {
+  LayoutDashboard, Ticket, PlusCircle, List, Users,
+  ChevronDown, Zap, Tag, Bell, MapPin,
+} from 'lucide-react'
+import useAuthStore from '../store/authStore'
+import { getInitials, getAvatarColor, ROLE_LABELS } from '../utils/helpers'
+
+const PARTICLES = [
+  { left: '8%',  delay: '0s',    duration: '5.5s',  size: '3px',  opacity: '0.8' },
+  { left: '18%', delay: '1.8s',  duration: '7.5s',  size: '2px',  opacity: '0.5' },
+  { left: '32%', delay: '3.5s',  duration: '6s',    size: '4px',  opacity: '0.7' },
+  { left: '47%', delay: '0.8s',  duration: '8s',    size: '2px',  opacity: '0.6' },
+  { left: '58%', delay: '4.2s',  duration: '5s',    size: '3px',  opacity: '0.9' },
+  { left: '68%', delay: '2.1s',  duration: '7s',    size: '2px',  opacity: '0.4' },
+  { left: '79%', delay: '5.3s',  duration: '6.5s',  size: '4px',  opacity: '0.7' },
+  { left: '90%', delay: '1.0s',  duration: '8.5s',  size: '2px',  opacity: '0.5' },
+]
+
+export default function Sidebar({ onClose }) {
+  const { user } = useAuthStore()
+  const location = useLocation()
+
+  const isTicketsSection = location.pathname.startsWith('/tickets')
+  const [ticketsOpen, setTicketsOpen] = useState(isTicketsSection)
+
+  useEffect(() => {
+    if (isTicketsSection) setTicketsOpen(true)
+  }, [isTicketsSection])
+
+  const mainLinkClass = ({ isActive }) =>
+    `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative overflow-hidden ${
+      isActive
+        ? 'bg-violet-500/20 text-white nav-active-glow border-l-[3px] border-violet-400 pl-[calc(0.75rem-3px)]'
+        : 'text-slate-400 hover:text-white hover:bg-white/10'
+    }`
+
+  const subLinkClass = ({ isActive }) =>
+    `group flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 ${
+      isActive
+        ? 'bg-violet-500/35 text-violet-200 font-semibold'
+        : 'text-slate-400 hover:text-white hover:bg-white/10'
+    }`
+
+  return (
+    <aside className="sidebar-bg flex flex-col w-64 h-full relative overflow-hidden">
+
+      {/* Floating particles */}
+      {PARTICLES.map((p, i) => (
+        <span key={i} className="sidebar-particle"
+          style={{
+            left: p.left,
+            animationDelay: p.delay,
+            animationDuration: p.duration,
+            width: p.size,
+            height: p.size,
+            opacity: p.opacity,
+          }} />
+      ))}
+
+      {/* Ambient glow orbs — larger and more vivid */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute rounded-full"
+          style={{
+            width: '240px', height: '240px',
+            top: '-30%', left: '-30%',
+            background: 'radial-gradient(circle, rgba(139,92,246,0.45) 0%, rgba(109,40,217,0.2) 40%, transparent 70%)',
+            filter: 'blur(50px)',
+            animation: 'waterFloat1 14s ease-in-out infinite',
+          }} />
+        <div className="absolute rounded-full"
+          style={{
+            width: '180px', height: '180px',
+            bottom: '5%', right: '-25%',
+            background: 'radial-gradient(circle, rgba(167,139,250,0.35) 0%, rgba(124,58,237,0.15) 50%, transparent 70%)',
+            filter: 'blur(40px)',
+            animation: 'waterFloat3 20s ease-in-out infinite 4s',
+          }} />
+        <div className="absolute rounded-full"
+          style={{
+            width: '120px', height: '120px',
+            top: '40%', left: '50%',
+            background: 'radial-gradient(circle, rgba(192,132,252,0.2) 0%, transparent 70%)',
+            filter: 'blur(30px)',
+            animation: 'waterFloat2 17s ease-in-out infinite 8s',
+          }} />
+      </div>
+
+      {/* Logo */}
+      <div className="relative flex items-center gap-3 px-5 py-5 border-b border-white/10">
+        <div className="logo-shimmer w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-violet-900/80">
+          <span className="text-white font-black text-xs tracking-tight drop-shadow">GLD</span>
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-white font-bold text-sm leading-tight truncate">GLD Service Portal</h1>
+          <p className="text-violet-300 text-xs flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
+            Portal de soporte técnico
+          </p>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="relative flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+
+        <div className="flex items-center gap-2 px-3 pb-3">
+          <span className="text-xs font-semibold text-slate-600 uppercase tracking-widest">Menú</span>
+          <div className="flex-1 h-px bg-gradient-to-r from-violet-600/70 to-transparent" />
+        </div>
+
+        <NavLink to="/" end className={mainLinkClass} onClick={onClose}>
+          <LayoutDashboard className="w-4 h-4 flex-shrink-0 transition-all duration-200 group-hover:scale-125 group-hover:rotate-6 group-hover:text-violet-300" />
+          Dashboard
+        </NavLink>
+
+        {/* Tickets accordion */}
+        <div>
+          <button
+            onClick={() => setTicketsOpen(o => !o)}
+            className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative overflow-hidden ${
+              isTicketsSection
+                ? 'bg-violet-500/20 text-white nav-active-glow border-l-[3px] border-violet-400 pl-[calc(0.75rem-3px)]'
+                : 'text-slate-400 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Ticket className="w-4 h-4 flex-shrink-0 transition-all duration-200 group-hover:scale-125 group-hover:-rotate-12 group-hover:text-violet-300" />
+            <span className="flex-1 text-left">Tickets</span>
+            <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${ticketsOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          <div className="overflow-hidden transition-all duration-300 ease-in-out"
+            style={{ maxHeight: ticketsOpen ? '130px' : '0px', opacity: ticketsOpen ? 1 : 0 }}>
+            <div className="ml-5 mt-1.5 mb-1 pl-3 space-y-0.5"
+              style={{ borderLeft: '1px solid rgba(139,92,246,0.4)' }}>
+
+              <div className="relative">
+                <div className="absolute -left-[15px] top-3 w-2 h-2 rounded-full bg-violet-400"
+                  style={{ boxShadow: '0 0 10px 2px rgba(139,92,246,0.9)' }} />
+                <NavLink to="/tickets" end className={subLinkClass} onClick={onClose}>
+                  <List className="w-3.5 h-3.5 flex-shrink-0 transition-all duration-150 group-hover:scale-125 group-hover:text-violet-300" />
+                  Ver todos
+                </NavLink>
+              </div>
+
+              <div className="relative">
+                <div className="absolute -left-[15px] top-3 w-1.5 h-1.5 rounded-full bg-violet-700/60" />
+                <NavLink to="/tickets/new" className={subLinkClass} onClick={onClose}>
+                  <PlusCircle className="w-3.5 h-3.5 flex-shrink-0 transition-all duration-200 group-hover:scale-125 group-hover:rotate-90 group-hover:text-violet-300" />
+                  Nuevo Ticket
+                </NavLink>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Admin section */}
+        {user?.role === 'ADMIN' && (
+          <>
+            <div className="flex items-center gap-2 px-3 pt-4 pb-2">
+              <span className="text-xs font-semibold text-slate-600 uppercase tracking-widest">Admin</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-violet-600/70 to-transparent" />
+            </div>
+            {/* Use sub-items under admin — accordion style */}
+            <div className="ml-5 pl-3 space-y-0.5"
+              style={{ borderLeft: '1px solid rgba(139,92,246,0.4)' }}>
+              <div className="relative">
+                <div className="absolute -left-[15px] top-3 w-2 h-2 rounded-full bg-violet-400"
+                  style={{ boxShadow: '0 0 8px 2px rgba(139,92,246,0.8)' }} />
+                <NavLink to="/admin" end className={subLinkClass} onClick={onClose}>
+                  <Users className="w-3.5 h-3.5 flex-shrink-0 transition-all duration-150 group-hover:scale-125 group-hover:text-violet-300" />
+                  Usuarios
+                </NavLink>
+              </div>
+              <div className="relative">
+                <div className="absolute -left-[15px] top-3 w-1.5 h-1.5 rounded-full bg-violet-700/60" />
+                <NavLink to="/admin/categories" className={subLinkClass} onClick={onClose}>
+                  <Tag className="w-3.5 h-3.5 flex-shrink-0 transition-all duration-150 group-hover:scale-125 group-hover:text-violet-300" />
+                  Categorías
+                </NavLink>
+              </div>
+              <div className="relative">
+                <div className="absolute -left-[15px] top-3 w-1.5 h-1.5 rounded-full bg-violet-700/60" />
+                <NavLink to="/admin/notifications" className={subLinkClass} onClick={onClose}>
+                  <Bell className="w-3.5 h-3.5 flex-shrink-0 transition-all duration-150 group-hover:scale-125 group-hover:text-violet-300" />
+                  Notificaciones
+                </NavLink>
+              </div>
+              <div className="relative">
+                <div className="absolute -left-[15px] top-3 w-1.5 h-1.5 rounded-full bg-violet-700/60" />
+                <NavLink to="/admin/sedes" className={subLinkClass} onClick={onClose}>
+                  <MapPin className="w-3.5 h-3.5 flex-shrink-0 transition-all duration-150 group-hover:scale-125 group-hover:text-violet-300" />
+                  Sedes
+                </NavLink>
+              </div>
+            </div>
+          </>
+        )}
+      </nav>
+
+      {/* User card */}
+      <div className="relative p-3 border-t border-white/10">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-violet-500/80 to-transparent" />
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/8 transition-colors duration-150 cursor-default">
+
+          <div className="relative flex-shrink-0">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-violet-600/80 ${getAvatarColor(user?.name)}`}
+              style={{ boxShadow: '0 0 14px rgba(139,92,246,0.5)' }}>
+              {getInitials(user?.name)}
+            </div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3">
+              <div className="online-ping absolute inset-0 rounded-full bg-emerald-400" />
+              <div className="relative w-3 h-3 rounded-full bg-emerald-500 border-2 border-[#1a0a4e]" />
+            </div>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-sm font-medium truncate">{user?.name}</p>
+            <p className="text-violet-300 text-xs truncate">{ROLE_LABELS[user?.role]}</p>
+          </div>
+
+          <Zap className="w-3.5 h-3.5 text-violet-300 flex-shrink-0 animate-pulse" />
+        </div>
+      </div>
+    </aside>
+  )
+}
