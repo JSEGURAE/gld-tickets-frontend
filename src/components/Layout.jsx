@@ -49,7 +49,7 @@ export default function Layout() {
 
         <footer className="relative z-10 border-t border-white/8 py-2.5 px-6 flex-shrink-0">
           <p className="text-center text-xs text-slate-500">
-            © 2026 GLD S.A. &nbsp;|&nbsp; Desarrollado por JS
+            © 2026 GLD S.A. &nbsp;|&nbsp; BI & DATA
           </p>
         </footer>
       </div>

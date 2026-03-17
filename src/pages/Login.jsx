@@ -272,7 +272,7 @@ export default function Login() {
       {/* Footer */}
       <div className="absolute bottom-4 left-0 right-0 text-center">
         <p className="text-xs text-slate-500">
-          © 2026 GLD S.A. &nbsp;|&nbsp; Desarrollado por JS
+          © 2026 GLD S.A. &nbsp;|&nbsp; BI & DATA
         </p>
       </div>
     </div>
