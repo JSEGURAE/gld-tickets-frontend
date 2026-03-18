@@ -82,7 +82,7 @@ export default function Tickets() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Buscar tickets..."
+              placeholder="Buscar por título o #número..."
               value={filters.search}
               onChange={e => setFilter('search', e.target.value)}
               className="input pl-9"
