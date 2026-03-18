@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Loader2, ArrowLeft, ImagePlus, X, Upload } from 'lucide-react'
+import { Loader2, ArrowLeft, Paperclip, X, Upload, FileText, FileSpreadsheet, File } from 'lucide-react'
 import { createTicket } from '../api/tickets'
 import { PRIORITY_LABELS, PRIORITIES } from '../utils/helpers'
 
@@ -15,19 +15,36 @@ export default function CreateTicket() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const ALLOWED_TYPES = [
+    'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+    'application/pdf',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ]
+
+  const getFileIcon = (f) => {
+    if (!f) return <File className="w-8 h-8 text-gray-400" />
+    if (f.type.startsWith('image/')) return null
+    if (f.type === 'application/pdf') return <FileText className="w-10 h-10 text-red-400" />
+    if (f.type.includes('excel') || f.type.includes('spreadsheet')) return <FileSpreadsheet className="w-10 h-10 text-green-500" />
+    return <FileText className="w-10 h-10 text-blue-400" />
+  }
+
   const handleFile = (f) => {
     if (!f) return
-    if (!f.type.startsWith('image/')) {
-      setError('Solo se permiten imágenes (JPG, PNG, GIF, WebP)')
+    if (!ALLOWED_TYPES.includes(f.type)) {
+      setError('Tipo no permitido. Use imágenes, PDF, Excel o Word.')
       return
     }
-    if (f.size > 5 * 1024 * 1024) {
-      setError('La imagen no puede superar los 5 MB')
+    if (f.size > 10 * 1024 * 1024) {
+      setError('El archivo no puede superar los 10 MB')
       return
     }
     setError('')
     setFile(f)
-    setPreview(URL.createObjectURL(f))
+    setPreview(f.type.startsWith('image/') ? URL.createObjectURL(f) : null)
   }
 
   const removeFile = (e) => {
@@ -148,46 +165,44 @@ export default function CreateTicket() {
             </div>
           </div>
 
-          {/* Image attachment */}
+          {/* File attachment */}
           <div>
             <label className="label flex items-center gap-1.5">
-              <ImagePlus className="w-4 h-4" />
-              Imagen adjunta
-              <span className="text-gray-400 font-normal text-xs">(opcional, máx. 5 MB)</span>
+              <Paperclip className="w-4 h-4" />
+              Archivo adjunto
+              <span className="text-gray-400 font-normal text-xs">(opcional, máx. 10 MB)</span>
             </label>
 
-            {/* Drop zone */}
             <div
               className={`relative border-2 border-dashed rounded-xl transition-all duration-200 ${
                 dragging
                   ? 'border-violet-400 bg-violet-50 scale-[1.01]'
-                  : preview
+                  : file
                     ? 'border-violet-300 bg-violet-50/50'
                     : 'border-gray-300 hover:border-violet-400 hover:bg-violet-50/30 cursor-pointer'
               }`}
-              onClick={() => !preview && fileInputRef.current?.click()}
+              onClick={() => !file && fileInputRef.current?.click()}
               onDragOver={e => { e.preventDefault(); setDragging(true) }}
               onDragLeave={() => setDragging(false)}
               onDrop={handleDrop}
             >
-              {preview ? (
-                <div className="p-3 flex flex-col items-center">
-                  <div className="relative group">
-                    <img
-                      src={preview}
-                      alt="Vista previa"
-                      className="max-h-52 rounded-lg object-contain shadow-sm"
-                    />
-                    <button
-                      type="button"
-                      onClick={removeFile}
-                      className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow-md flex items-center justify-center text-gray-500 hover:text-rose-600 hover:shadow-lg transition-all"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <p className="text-xs text-violet-600 font-medium mt-2 truncate max-w-xs">{file?.name}</p>
+              {file ? (
+                <div className="p-4 flex flex-col items-center gap-2">
+                  {preview ? (
+                    <div className="relative group">
+                      <img src={preview} alt="Vista previa" className="max-h-52 rounded-lg object-contain shadow-sm" />
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center">
+                      {getFileIcon(file)}
+                    </div>
+                  )}
+                  <p className="text-xs text-violet-600 font-medium truncate max-w-xs">{file?.name}</p>
                   <p className="text-xs text-gray-400">{(file?.size / 1024).toFixed(0)} KB</p>
+                  <button type="button" onClick={removeFile}
+                    className="flex items-center gap-1 text-xs text-rose-500 hover:text-rose-700 font-medium">
+                    <X className="w-3 h-3" /> Quitar archivo
+                  </button>
                 </div>
               ) : (
                 <div className="p-8 text-center">
@@ -195,17 +210,17 @@ export default function CreateTicket() {
                     <Upload className="w-6 h-6 text-gray-400" />
                   </div>
                   <p className="text-sm text-gray-600">
-                    Arrastra una imagen aquí o{' '}
+                    Arrastra un archivo aquí o{' '}
                     <span className="text-violet-600 font-semibold">selecciona un archivo</span>
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF, WebP — hasta 5 MB</p>
+                  <p className="text-xs text-gray-400 mt-1">PNG, JPG, PDF, Excel, Word — hasta 10 MB</p>
                 </div>
               )}
 
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,application/pdf,.xlsx,.xls,.docx,.doc"
                 onChange={e => handleFile(e.target.files[0])}
                 className="hidden"
               />
