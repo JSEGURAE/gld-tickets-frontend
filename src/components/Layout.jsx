@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Navbar from './Navbar'
+import { usePushNotifications } from '../hooks/usePushNotifications'
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
+  usePushNotifications()
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#080c14]">
