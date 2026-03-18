@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Loader2, Edit2, Trash2, User, Calendar, Clock,
   MessageSquare, History, Send, ChevronDown, AlertCircle, Paperclip, ExternalLink,
-  Eye, UserPlus, X as XIcon,
+  Eye, UserPlus, X as XIcon, FileText, FileSpreadsheet, File,
 } from 'lucide-react'
 import { getTicket, updateTicket, addComment, deleteTicket, tagSupervisor, untagSupervisor } from '../api/tickets'
 import { getTechnicians, getSupervisors } from '../api/users'
@@ -36,7 +36,9 @@ export default function TicketDetail() {
 
   // Comment
   const [commentText, setCommentText] = useState('')
+  const [commentFile, setCommentFile] = useState(null)
   const [commentLoading, setCommentLoading] = useState(false)
+  const commentFileRef = useRef(null)
 
   // Delete
   const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -148,14 +150,25 @@ export default function TicketDetail() {
     if (!commentText.trim()) return
     setCommentLoading(true)
     try {
-      await addComment(id, commentText)
+      await addComment(id, commentText, commentFile)
       setCommentText('')
+      setCommentFile(null)
+      if (commentFileRef.current) commentFileRef.current.value = ''
       await refresh()
     } catch (err) {
       setError(err.response?.data?.error || 'Error al agregar comentario')
     } finally {
       setCommentLoading(false)
     }
+  }
+
+  const getCommentFileIcon = (name) => {
+    if (!name) return <File className="w-4 h-4" />
+    const ext = name.split('.').pop().toLowerCase()
+    if (['pdf'].includes(ext)) return <FileText className="w-4 h-4 text-red-400" />
+    if (['xls', 'xlsx'].includes(ext)) return <FileSpreadsheet className="w-4 h-4 text-green-400" />
+    if (['doc', 'docx'].includes(ext)) return <FileText className="w-4 h-4 text-blue-400" />
+    return <File className="w-4 h-4 text-gray-400" />
   }
 
   const handleDelete = async () => {
@@ -291,6 +304,18 @@ export default function TicketDetail() {
                     </div>
                     <div className="bg-white/5 rounded-lg px-3 py-2.5 text-sm text-slate-300 leading-relaxed">
                       {comment.content}
+                      {comment.attachmentUrl && (
+                        <a
+                          href={comment.attachmentUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 transition-colors"
+                        >
+                          {getCommentFileIcon(comment.attachmentName)}
+                          {comment.attachmentName || 'Adjunto'}
+                          <ExternalLink className="w-3 h-3 ml-0.5" />
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -301,21 +326,47 @@ export default function TicketDetail() {
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-bold ${getAvatarColor(user?.name)}`}>
                   {getInitials(user?.name)}
                 </div>
-                <div className="flex-1 relative">
-                  <textarea
-                    className="textarea pr-12"
-                    rows={3}
-                    placeholder="Agrega un comentario..."
-                    value={commentText}
-                    onChange={e => setCommentText(e.target.value)}
-                  />
-                  <button
-                    type="submit"
-                    disabled={!commentText.trim() || commentLoading}
-                    className="absolute bottom-2 right-2 p-1.5 text-indigo-600 hover:text-indigo-700 disabled:opacity-30 transition-opacity"
-                  >
-                    {commentLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  </button>
+                <div className="flex-1">
+                  <div className="relative">
+                    <textarea
+                      className="textarea pr-12"
+                      rows={3}
+                      placeholder="Agrega un comentario..."
+                      value={commentText}
+                      onChange={e => setCommentText(e.target.value)}
+                    />
+                    <button
+                      type="submit"
+                      disabled={!commentText.trim() || commentLoading}
+                      className="absolute bottom-2 right-2 p-1.5 text-indigo-400 hover:text-indigo-300 disabled:opacity-30 transition-opacity"
+                    >
+                      {commentLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {isTechOrAdmin && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => commentFileRef.current?.click()}
+                        className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-violet-400 transition-colors"
+                      >
+                        <Paperclip className="w-3.5 h-3.5" />
+                        {commentFile ? commentFile.name : 'Adjuntar archivo'}
+                      </button>
+                      {commentFile && (
+                        <button type="button" onClick={() => { setCommentFile(null); if (commentFileRef.current) commentFileRef.current.value = '' }} className="text-rose-400 hover:text-rose-300">
+                          <XIcon className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      <input
+                        ref={commentFileRef}
+                        type="file"
+                        accept="image/*,application/pdf,.xlsx,.xls,.docx,.doc"
+                        onChange={e => setCommentFile(e.target.files[0] || null)}
+                        className="hidden"
+                      />
+                    </div>
+                  )}
                 </div>
               </form>
             </div>
