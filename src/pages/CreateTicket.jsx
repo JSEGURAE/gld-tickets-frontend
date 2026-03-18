@@ -95,15 +95,15 @@ export default function CreateTicket() {
   }
 
   return (
-    <div className="max-w-2xl animate-fade-in">
+    <div className="max-w-2xl mx-auto animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate(-1)} className="btn-ghost p-2">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Nuevo Ticket</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Describe tu solicitud con el mayor detalle posible</p>
+          <h1 className="text-2xl font-bold text-slate-100">Nuevo Ticket</h1>
+          <p className="text-slate-400 text-sm mt-0.5">Describe tu solicitud con el mayor detalle posible</p>
         </div>
       </div>
 
