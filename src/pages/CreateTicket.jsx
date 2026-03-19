@@ -8,7 +8,7 @@ export default function CreateTicket() {
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
 
-  const [form, setForm] = useState({ title: '', description: '', priority: 'MEDIUM' })
+  const [form, setForm] = useState({ title: '', remoteId: '', description: '', priority: 'MEDIUM' })
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
   const [dragging, setDragging] = useState(false)
@@ -75,6 +75,7 @@ export default function CreateTicket() {
     formData.append('title', form.title.trim())
     formData.append('description', form.description.trim())
     formData.append('priority', form.priority)
+    if (form.remoteId.trim()) formData.append('remoteId', form.remoteId.trim())
     if (file) formData.append('image', file)
 
     try {
@@ -125,6 +126,22 @@ export default function CreateTicket() {
               required
             />
             <p className="text-xs text-gray-400 mt-1 text-right">{form.title.length}/200</p>
+          </div>
+
+          {/* Remote ID */}
+          <div>
+            <label className="label">
+              Anydesk / TeamViewer
+              <span className="text-gray-400 font-normal text-xs ml-1">(opcional)</span>
+            </label>
+            <input
+              type="text"
+              className="input"
+              placeholder="Ej: 123 456 789"
+              value={form.remoteId}
+              onChange={e => setForm(f => ({ ...f, remoteId: e.target.value }))}
+              maxLength={50}
+            />
           </div>
 
           {/* Description */}

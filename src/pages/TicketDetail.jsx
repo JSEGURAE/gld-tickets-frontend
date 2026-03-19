@@ -503,6 +503,15 @@ export default function TicketDetail() {
                   <span className="font-medium text-slate-200 text-xs">{ticket.subCategory.name}</span>
                 </div>
               )}
+              {ticket.remoteId && (
+                <>
+                  <hr className="border-white/10" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Anydesk / TeamViewer</span>
+                    <span className="font-mono text-sm font-medium text-violet-300">{ticket.remoteId}</span>
+                  </div>
+                </>
+              )}
               <hr className="border-white/10" />
               <div>
                 <span className="text-gray-500 flex items-center gap-1">
