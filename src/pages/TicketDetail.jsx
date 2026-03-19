@@ -520,40 +520,59 @@ export default function TicketDetail() {
           </div>
 
           {/* Attachment */}
-          {ticket.attachmentUrl && (
-            <div className="card">
-              <div className="card-header">
-                <h2 className="font-semibold text-slate-100 flex items-center gap-2">
-                  <Paperclip className="w-4 h-4" /> Imagen adjunta
-                </h2>
+          {ticket.attachmentUrl && (() => {
+            const name = ticket.attachmentName || ''
+            const ext = name.split('.').pop().toLowerCase()
+            const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)
+            const isPdf = ext === 'pdf'
+            const isExcel = ['xls', 'xlsx'].includes(ext)
+            const isWord = ['doc', 'docx'].includes(ext)
+            return (
+              <div className="card">
+                <div className="card-header">
+                  <h2 className="font-semibold text-slate-100 flex items-center gap-2">
+                    <Paperclip className="w-4 h-4" /> Adjuntos
+                  </h2>
+                </div>
+                <div className="card-body">
+                  <a href={ticket.attachmentUrl} target="_blank" rel="noopener noreferrer" className="block group">
+                    {isImage ? (
+                      <div className="relative overflow-hidden rounded-lg border border-white/10">
+                        <img
+                          src={ticket.attachmentUrl}
+                          alt={name || 'Adjunto'}
+                          className="w-full object-contain max-h-64 bg-white/5 transition-transform duration-200 group-hover:scale-[1.02]"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 flex items-center justify-center">
+                          <ExternalLink className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-lg" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3 p-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${isPdf ? 'bg-red-500/20' : isExcel ? 'bg-green-500/20' : isWord ? 'bg-blue-500/20' : 'bg-gray-500/20'}`}>
+                          {isPdf && <FileText className="w-5 h-5 text-red-400" />}
+                          {isExcel && <FileSpreadsheet className="w-5 h-5 text-green-400" />}
+                          {isWord && <FileText className="w-5 h-5 text-blue-400" />}
+                          {!isPdf && !isExcel && !isWord && <File className="w-5 h-5 text-gray-400" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-slate-200 truncate">{name || 'Adjunto'}</p>
+                          <p className="text-xs text-gray-500 uppercase">{ext || 'archivo'}</p>
+                        </div>
+                        <ExternalLink className="w-4 h-4 text-gray-500 group-hover:text-violet-400 transition-colors flex-shrink-0" />
+                      </div>
+                    )}
+                    {isImage && name && (
+                      <p className="text-xs text-gray-500 mt-1.5 truncate flex items-center gap-1">
+                        <Paperclip className="w-3 h-3 flex-shrink-0" />
+                        {name}
+                      </p>
+                    )}
+                  </a>
+                </div>
               </div>
-              <div className="card-body">
-                <a
-                  href={ticket.attachmentUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block group"
-                >
-                  <div className="relative overflow-hidden rounded-lg border border-white/10">
-                    <img
-                      src={ticket.attachmentUrl}
-                      alt={ticket.attachmentName || 'Adjunto'}
-                      className="w-full object-contain max-h-64 bg-white/5 transition-transform duration-200 group-hover:scale-[1.02]"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 flex items-center justify-center">
-                      <ExternalLink className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-lg" />
-                    </div>
-                  </div>
-                  {ticket.attachmentName && (
-                    <p className="text-xs text-gray-500 mt-1.5 truncate flex items-center gap-1">
-                      <Paperclip className="w-3 h-3 flex-shrink-0" />
-                      {ticket.attachmentName}
-                    </p>
-                  )}
-                </a>
-              </div>
-            </div>
-          )}
+            )
+          })()}
 
           {/* History */}
           {ticket.history?.length > 0 && (
