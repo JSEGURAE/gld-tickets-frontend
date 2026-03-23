@@ -4,6 +4,7 @@ import {
   PlusCircle, Search, Filter, Loader2, Ticket, ChevronLeft, ChevronRight, X
 } from 'lucide-react'
 import { getTickets } from '../api/tickets'
+import { getTechnicians } from '../api/users'
 import { StatusBadge, PriorityBadge } from '../components/TicketBadge'
 import { timeAgo, STATUS_LABELS, PRIORITY_LABELS, STATUSES, PRIORITIES } from '../utils/helpers'
 import useAuthStore from '../store/authStore'
@@ -12,14 +13,20 @@ export default function Tickets() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuthStore()
+  const [technicians, setTechnicians] = useState([])
 
   const [data, setData] = useState({ tickets: [], pagination: { total: 0, page: 1, totalPages: 1 } })
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getTechnicians().then(setTechnicians).catch(() => {})
+  }, [])
 
   const filters = {
     status: searchParams.get('status') || '',
     priority: searchParams.get('priority') || '',
     search: searchParams.get('search') || '',
+    assigneeId: searchParams.get('assigneeId') || '',
     page: parseInt(searchParams.get('page') || '1'),
   }
 
@@ -30,6 +37,7 @@ export default function Tickets() {
       if (filters.status) params.status = filters.status
       if (filters.priority) params.priority = filters.priority
       if (filters.search) params.search = filters.search
+      if (filters.assigneeId) params.assigneeId = filters.assigneeId
       const result = await getTickets(params)
       setData(result)
     } catch {
@@ -56,7 +64,7 @@ export default function Tickets() {
   }
 
   const clearFilters = () => setSearchParams({})
-  const hasFilters = filters.status || filters.priority || filters.search
+  const hasFilters = filters.status || filters.priority || filters.search || filters.assigneeId
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -112,6 +120,20 @@ export default function Tickets() {
               <option key={p} value={p}>{PRIORITY_LABELS[p]}</option>
             ))}
           </select>
+
+          {/* Assignee filter */}
+          {technicians.length > 0 && (
+            <select
+              value={filters.assigneeId}
+              onChange={e => setFilter('assigneeId', e.target.value)}
+              className="select w-44"
+            >
+              <option value="">Todos los asignados</option>
+              {technicians.map(t => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+          )}
 
           {/* Clear filters */}
           {hasFilters && (
