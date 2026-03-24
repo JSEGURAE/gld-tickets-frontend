@@ -37,8 +37,57 @@ export default function TicketDetail() {
   // Comment
   const [commentText, setCommentText] = useState('')
   const [commentFile, setCommentFile] = useState(null)
+  const [commentPreview, setCommentPreview] = useState(null)
+  const [commentFileError, setCommentFileError] = useState('')
   const [commentLoading, setCommentLoading] = useState(false)
   const commentFileRef = useRef(null)
+
+  const COMMENT_ALLOWED_TYPES = [
+    'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+    'application/pdf',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ]
+
+  const handleCommentFile = (f) => {
+    if (!f) return
+    if (!COMMENT_ALLOWED_TYPES.includes(f.type)) {
+      setCommentFileError('Tipo no permitido. Use imágenes, PDF, Excel o Word.')
+      return
+    }
+    if (f.size > 10 * 1024 * 1024) {
+      setCommentFileError('El archivo no puede superar los 10 MB.')
+      return
+    }
+    setCommentFileError('')
+    setCommentFile(f)
+    setCommentPreview(f.type.startsWith('image/') ? URL.createObjectURL(f) : null)
+  }
+
+  const removeCommentFile = () => {
+    if (commentPreview) URL.revokeObjectURL(commentPreview)
+    setCommentFile(null)
+    setCommentPreview(null)
+    setCommentFileError('')
+    if (commentFileRef.current) commentFileRef.current.value = ''
+  }
+
+  const handleCommentPaste = (e) => {
+    const items = e.clipboardData?.items
+    if (!items) return
+    for (const item of items) {
+      if (item.kind === 'file') {
+        const f = item.getAsFile()
+        if (f) {
+          e.preventDefault()
+          handleCommentFile(f)
+          return
+        }
+      }
+    }
+  }
 
   // Delete
   const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -152,8 +201,7 @@ export default function TicketDetail() {
     try {
       await addComment(id, commentText, commentFile)
       setCommentText('')
-      setCommentFile(null)
-      if (commentFileRef.current) commentFileRef.current.value = ''
+      removeCommentFile()
       await refresh()
     } catch (err) {
       setError(err.response?.data?.error || 'Error al agregar comentario')
@@ -322,7 +370,7 @@ export default function TicketDetail() {
               ))}
 
               {/* Add comment */}
-              <form onSubmit={handleComment} className="flex gap-3 pt-2 border-t border-white/8">
+              <form onSubmit={handleComment} className="flex gap-3 pt-2 border-t dark:border-white/8 border-slate-200">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-bold ${getAvatarColor(user?.name)}`}>
                   {getInitials(user?.name)}
                 </div>
@@ -334,6 +382,7 @@ export default function TicketDetail() {
                       placeholder="Agrega un comentario..."
                       value={commentText}
                       onChange={e => setCommentText(e.target.value)}
+                      onPaste={handleCommentPaste}
                     />
                     <button
                       type="submit"
@@ -343,30 +392,51 @@ export default function TicketDetail() {
                       {commentLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                     </button>
                   </div>
-                  {isTechOrAdmin && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => commentFileRef.current?.click()}
-                        className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-violet-400 transition-colors"
-                      >
-                        <Paperclip className="w-3.5 h-3.5" />
-                        {commentFile ? commentFile.name : 'Adjuntar archivo'}
-                      </button>
-                      {commentFile && (
-                        <button type="button" onClick={() => { setCommentFile(null); if (commentFileRef.current) commentFileRef.current.value = '' }} className="text-rose-400 hover:text-rose-300">
-                          <XIcon className="w-3.5 h-3.5" />
-                        </button>
+
+                  {/* File preview */}
+                  {commentFile && (
+                    <div className="mt-2 flex items-center gap-3 p-2.5 rounded-lg dark:bg-white/5 bg-slate-100 border dark:border-white/10 border-slate-200">
+                      {commentPreview ? (
+                        <img src={commentPreview} alt="preview" className="h-14 w-14 object-cover rounded-md flex-shrink-0 border dark:border-white/10 border-slate-200" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 dark:bg-white/10 bg-slate-200">
+                          {getCommentFileIcon(commentFile.name)}
+                        </div>
                       )}
-                      <input
-                        ref={commentFileRef}
-                        type="file"
-                        accept="image/*,application/pdf,.xlsx,.xls,.docx,.doc"
-                        onChange={e => setCommentFile(e.target.files[0] || null)}
-                        className="hidden"
-                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium dark:text-slate-300 text-slate-700 truncate">{commentFile.name}</p>
+                        <p className="text-xs dark:text-slate-500 text-slate-400">{(commentFile.size / 1024).toFixed(0)} KB</p>
+                      </div>
+                      <button type="button" onClick={removeCommentFile} className="text-rose-400 hover:text-rose-500 flex-shrink-0 transition-colors">
+                        <XIcon className="w-4 h-4" />
+                      </button>
                     </div>
                   )}
+
+                  {/* Error */}
+                  {commentFileError && (
+                    <p className="text-xs text-rose-400 mt-1">{commentFileError}</p>
+                  )}
+
+                  {/* Attach row */}
+                  <div className="mt-2 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => commentFileRef.current?.click()}
+                      className="flex items-center gap-1.5 text-xs dark:text-slate-400 text-slate-500 dark:hover:text-violet-400 hover:text-violet-600 transition-colors"
+                    >
+                      <Paperclip className="w-3.5 h-3.5" />
+                      Adjuntar archivo
+                    </button>
+                    <span className="text-xs dark:text-slate-600 text-slate-400">· Ctrl+V para pegar</span>
+                    <input
+                      ref={commentFileRef}
+                      type="file"
+                      accept="image/*,application/pdf,.xlsx,.xls,.docx,.doc"
+                      onChange={e => handleCommentFile(e.target.files[0] || null)}
+                      className="hidden"
+                    />
+                  </div>
                 </div>
               </form>
             </div>
