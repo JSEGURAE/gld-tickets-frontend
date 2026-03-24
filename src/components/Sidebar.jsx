@@ -34,14 +34,14 @@ export default function Sidebar({ onClose }) {
   const mainLinkClass = ({ isActive }) =>
     `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative overflow-hidden ${
       isActive
-        ? 'dark:bg-violet-500/20 bg-violet-50 dark:text-white text-violet-700 dark:nav-active-glow border-l-[3px] border-violet-500 pl-[calc(0.75rem-3px)]'
+        ? 'dark:bg-violet-500/20 bg-blue-50 dark:text-white text-blue-600 dark:nav-active-glow border-l-[3px] dark:border-violet-500 border-blue-600 pl-[calc(0.75rem-3px)]'
         : 'dark:text-slate-400 text-slate-600 dark:hover:text-white hover:text-slate-900 dark:hover:bg-white/10 hover:bg-slate-100'
     }`
 
   const subLinkClass = ({ isActive }) =>
     `group flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 ${
       isActive
-        ? 'dark:bg-violet-500/35 bg-violet-50 dark:text-violet-200 text-violet-700 font-semibold'
+        ? 'dark:bg-violet-500/35 bg-blue-50 dark:text-violet-200 text-blue-600 font-semibold'
         : 'dark:text-slate-400 text-slate-500 dark:hover:text-white hover:text-slate-900 dark:hover:bg-white/10 hover:bg-slate-100'
     }`
 
@@ -127,8 +127,8 @@ export default function Sidebar({ onClose }) {
             onClick={() => setTicketsOpen(o => !o)}
             className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative overflow-hidden ${
               isTicketsSection
-                ? 'bg-violet-500/20 dark:text-white text-violet-950 nav-active-glow border-l-[3px] border-violet-400 pl-[calc(0.75rem-3px)]'
-                : 'dark:text-slate-400 text-violet-800/70 dark:hover:text-white hover:text-violet-950 hover:bg-white/10'
+                ? 'dark:bg-violet-500/20 bg-blue-50 dark:text-white text-blue-600 dark:nav-active-glow border-l-[3px] dark:border-violet-400 border-blue-600 pl-[calc(0.75rem-3px)]'
+                : 'dark:text-slate-400 text-slate-600 dark:hover:text-white hover:text-slate-900 dark:hover:bg-white/10 hover:bg-slate-100'
             }`}
           >
             <Ticket className="w-4 h-4 flex-shrink-0 transition-all duration-200 group-hover:scale-125 group-hover:-rotate-12 group-hover:text-violet-400" />
