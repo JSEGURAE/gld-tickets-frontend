@@ -292,11 +292,11 @@ html:not(.dark) .sidebar-ambient { opacity: 0.2; }
   background-size: 100% 300%;
   animation: sidebarGradShift 12s ease-in-out infinite;
 }
-/* Light sidebar: soft violet/indigo gradient, no animation */
+/* Light sidebar: white/clean, no animation */
 html:not(.dark) .sidebar-bg {
-  background: linear-gradient(160deg,
-    #f5f3ff 0%, #ede9fe 25%, #ddd6fe 55%, #ede9fe 80%, #f5f3ff 100%);
+  background: #ffffff;
   animation: none;
+  border-right: 1px solid rgba(0,0,0,0.08);
 }
 
 /* ─── Card interactions ──────────────────────────────────────────────────────── */

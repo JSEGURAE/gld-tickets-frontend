@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { LogOut, ChevronDown, Menu } from 'lucide-react'
 import useAuthStore from '../store/authStore'
 import { getInitials, getAvatarColor } from '../utils/helpers'
-import ThemeToggle from './ThemeToggle'
 
 export default function Navbar({ onMenuClick }) {
   const { user, logout } = useAuthStore()
@@ -34,9 +33,6 @@ export default function Navbar({ onMenuClick }) {
       </button>
 
       <div className="flex-1" />
-
-      {/* Theme toggle */}
-      <ThemeToggle />
 
       {/* User dropdown */}
       <div className="relative">
