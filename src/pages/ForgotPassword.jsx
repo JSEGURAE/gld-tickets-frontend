@@ -64,9 +64,8 @@ export default function ForgotPassword() {
               </div>
               <h2 className="text-xl font-semibold text-white mb-2">Solicitud enviada</h2>
               <p className="text-white/50 text-sm mb-6">
-                Se ha enviado un enlace de recuperación a{' '}
-                <span className="text-white/80 font-medium">jsegura@drmaxsalud.net</span>.
-                El enlace expira en 1 hora.
+                Si el correo <span className="text-white/80 font-medium">{email}</span> está
+                registrado, recibirás instrucciones para restablecer tu contraseña en tu bandeja de entrada.
               </p>
               <Link to="/login"
                 className="w-full py-2.5 px-4 bg-white text-gray-900 font-semibold text-sm rounded-xl hover:bg-white/90 transition-all flex items-center justify-center">
@@ -77,18 +76,17 @@ export default function ForgotPassword() {
             <>
               <h2 className="text-xl font-semibold text-white mb-1">Olvidé mi contraseña</h2>
               <p className="text-white/50 text-sm mb-7">
-                Ingresa tu usuario y enviaremos un enlace de recuperación a{' '}
-                <span className="text-white/70">jsegura@drmaxsalud.net</span>.
+                Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/60 mb-1.5">Usuario</label>
+                  <label className="block text-sm font-medium text-white/60 mb-1.5">Correo electrónico</label>
                   <input
-                    type="text"
+                    type="email"
                     className="w-full px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 transition-all"
                     style={inputStyle}
-                    placeholder="Tu usuario o correo"
+                    placeholder="tu@correo.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     required
