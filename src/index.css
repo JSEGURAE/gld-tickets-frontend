@@ -4,64 +4,206 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Design Tokens ─────────────────────────────────────────────────────────── */
+:root {
+  /* Backgrounds — light mode */
+  --bg-base:     #eef1f8;
+  --bg-surface:  #ffffff;
+  --bg-elevated: #f8fafc;
+  --bg-input:    #f1f5f9;
+
+  /* Text — light mode (WCAG AA on their respective bg) */
+  --text-primary:   #0f172a;   /* slate-950  — headings */
+  --text-secondary: #1e293b;   /* slate-800  — body */
+  --text-tertiary:  #475569;   /* slate-600  — labels */
+  --text-muted:     #94a3b8;   /* slate-400  — placeholders */
+
+  /* Borders */
+  --border-default: rgba(0, 0, 0, 0.09);
+  --border-strong:  rgba(0, 0, 0, 0.13);
+
+  /* Interactive */
+  --table-hover:        rgba(109, 40, 217, 0.05);
+  --interactive-hover:  rgba(0, 0, 0, 0.04);
+  --interactive-active: rgba(0, 0, 0, 0.08);
+
+  /* Component-level */
+  --navbar-bg:   rgba(238, 241, 248, 0.92);
+  --modal-bg:    rgba(255, 255, 255, 0.98);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.07), 0 4px 16px rgba(0, 0, 0, 0.05);
+
+  color-scheme: light;
+}
+
+.dark {
+  /* Backgrounds — dark mode */
+  --bg-base:     #080c14;
+  --bg-surface:  #111827;
+  --bg-elevated: #1a2035;
+  --bg-input:    #1e2433;
+
+  /* Text — dark mode */
+  --text-primary:   #f1f5f9;   /* slate-100 */
+  --text-secondary: #e2e8f0;   /* slate-200 */
+  --text-tertiary:  #94a3b8;   /* slate-400 */
+  --text-muted:     #64748b;   /* slate-500 */
+
+  /* Borders */
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-strong:  rgba(255, 255, 255, 0.12);
+
+  /* Interactive */
+  --table-hover:        rgba(109, 40, 217, 0.18);
+  --interactive-hover:  rgba(255, 255, 255, 0.06);
+  --interactive-active: rgba(255, 255, 255, 0.12);
+
+  /* Component-level */
+  --navbar-bg:   rgba(8, 12, 20, 0.85);
+  --modal-bg:    rgba(17, 24, 39, 0.98);
+  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+
+  color-scheme: dark;
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────────────── */
 @layer base {
-  html { font-family: 'Inter', system-ui, sans-serif; }
-  body { @apply bg-[#080c14] text-slate-200 antialiased; }
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-secondary);
+    @apply antialiased;
+  }
   * { @apply box-border; }
 
-  /* Force dark theme on all native select/option elements */
   select {
-    color-scheme: dark;
-    background-color: #1e2433;
-    color: #e2e8f0;
+    background-color: var(--bg-input);
+    color: var(--text-secondary);
   }
+  .dark select { color-scheme: dark; }
   select option {
-    background-color: #1e2433;
-    color: #e2e8f0;
+    background-color: var(--bg-input);
+    color: var(--text-secondary);
   }
-  select option:checked,
-  select option:focus,
-  select option:hover {
+  .dark select option:checked,
+  .dark select option:focus {
     background-color: #4c1d95;
     color: #ffffff;
   }
 }
 
+/* ─── Component Layer ────────────────────────────────────────────────────────── */
 @layer components {
+  /* Buttons */
   .btn-primary {
-    @apply inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 active:scale-95 text-white text-sm font-medium rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500
+           active:scale-95 text-white text-sm font-medium rounded-lg
+           transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
-    @apply inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 active:scale-95 text-slate-200 text-sm font-medium rounded-lg border border-white/15 transition-all duration-150;
+    @apply inline-flex items-center gap-2 px-4 py-2 active:scale-95 text-sm
+           font-medium rounded-lg border transition-all duration-150;
+    background-color: var(--interactive-hover);
+    color: var(--text-secondary);
+    border-color: var(--border-strong);
+  }
+  .btn-secondary:hover {
+    background-color: var(--interactive-active);
   }
   .btn-danger {
-    @apply inline-flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-500 active:scale-95 text-white text-sm font-medium rounded-lg transition-all duration-150;
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-500
+           active:scale-95 text-white text-sm font-medium rounded-lg transition-all duration-150;
   }
   .btn-ghost {
-    @apply inline-flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-slate-100 hover:bg-white/10 active:scale-95 text-sm font-medium rounded-lg transition-all duration-150;
+    @apply inline-flex items-center gap-2 px-3 py-2 active:scale-95 text-sm
+           font-medium rounded-lg transition-all duration-150;
+    color: var(--text-muted);
   }
+  .btn-ghost:hover {
+    color: var(--text-primary);
+    background-color: var(--interactive-hover);
+  }
+
+  /* Form elements */
   .input {
-    @apply w-full px-3 py-2 text-sm border border-white/12 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-slate-200 placeholder-slate-500 transition-all duration-150;
-    background-color: #1e2433;
+    @apply w-full px-3 py-2 text-sm rounded-lg focus:outline-none focus:ring-2
+           focus:ring-violet-500 focus:border-transparent transition-all duration-150;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-default);
+    color: var(--text-secondary);
   }
+  .input::placeholder { color: var(--text-muted); }
   .select {
-    @apply w-full px-3 py-2 text-sm border border-white/12 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-slate-200 transition-all duration-150 appearance-none;
-    background-color: #1e2433;
-    color-scheme: dark;
+    @apply w-full px-3 py-2 text-sm rounded-lg focus:outline-none focus:ring-2
+           focus:ring-violet-500 focus:border-transparent transition-all duration-150 appearance-none;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-default);
+    color: var(--text-secondary);
   }
   .textarea {
-    @apply w-full px-3 py-2 text-sm border border-white/12 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-slate-200 placeholder-slate-500 transition-all duration-150 resize-none;
-    background-color: #1e2433;
+    @apply w-full px-3 py-2 text-sm rounded-lg focus:outline-none focus:ring-2
+           focus:ring-violet-500 focus:border-transparent transition-all duration-150 resize-none;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-default);
+    color: var(--text-secondary);
   }
-  .label { @apply block text-sm font-medium text-slate-300 mb-1; }
-  .card { @apply bg-[#111827]/95 rounded-2xl border border-white/8 shadow-lg; color: #e2e8f0; }
-  .card-header { @apply px-6 py-4 border-b border-white/8; }
+  .textarea::placeholder { color: var(--text-muted); }
+  .label {
+    @apply block text-sm font-medium mb-1;
+    color: var(--text-tertiary);
+  }
+
+  /* Card */
+  .card {
+    @apply rounded-2xl border;
+    background-color: var(--bg-surface);
+    border-color: var(--border-default);
+    color: var(--text-secondary);
+    box-shadow: var(--card-shadow);
+  }
+  .card-header {
+    @apply px-6 py-4 border-b;
+    border-color: var(--border-default);
+  }
   .card-body { @apply px-6 py-4; }
-  .table-th { @apply px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider bg-white/4; }
-  .table-td { @apply px-4 py-3 text-sm text-slate-300; }
-  .table-row { @apply hover:bg-violet-900/25 border-b border-white/6 last:border-0 transition-colors duration-150 cursor-pointer; }
+
+  /* Table */
+  .table-th {
+    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider;
+    color: var(--text-muted);
+    background-color: var(--interactive-hover);
+  }
+  .table-td {
+    @apply px-4 py-3 text-sm;
+    color: var(--text-tertiary);
+  }
+  .table-row {
+    @apply border-b last:border-0 transition-colors duration-150 cursor-pointer;
+    border-color: var(--border-default);
+  }
+  .table-row:hover {
+    background-color: var(--table-hover);
+  }
 }
 
+/* ─── Smooth theme transition ────────────────────────────────────────────────── */
+html,
+body,
+.card,
+.sidebar-bg,
+header,
+.input, .select, .textarea,
+.btn-secondary, .btn-ghost {
+  transition: background-color 0.3s ease, border-color 0.25s ease, color 0.2s ease !important;
+}
+/* Preserve existing transition for transform/shadow on card */
+.card {
+  transition: background-color 0.3s ease, border-color 0.25s ease,
+              color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────────── */
 @keyframes pageSlideIn {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -74,14 +216,18 @@
 }
 .animate-fade-in { animation: fadeIn 0.2s ease-out; }
 
+/* ─── Scrollbar ──────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { @apply bg-transparent; }
-::-webkit-scrollbar-thumb { @apply bg-slate-700 rounded-full; }
-::-webkit-scrollbar-thumb:hover { @apply bg-violet-400; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background-color: var(--text-muted);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover { background-color: #8b5cf6; }
 
 /* ─── Sidebar animations ─────────────────────────────────────────────────────── */
 @keyframes activePulse {
-  0%,100% {
+  0%, 100% {
     box-shadow: 0 0 18px -2px rgba(139,92,246,0.7),
                 inset 0 0 14px rgba(139,92,246,0.12),
                 0 0 40px -8px rgba(139,92,246,0.4);
@@ -109,10 +255,14 @@
   animation: floatParticle linear infinite;
   box-shadow: 0 0 6px rgba(167,139,250,0.8);
 }
+/* Hide particles in light mode — they'd look odd on a light sidebar */
+html:not(.dark) .sidebar-particle { display: none; }
+/* Dim ambient glow orbs in light mode */
+html:not(.dark) .sidebar-ambient { opacity: 0.2; }
 
 @keyframes logoShimmer {
   0%   { background-position: -300% center; }
-  100% { background-position: 300% center; }
+  100% { background-position:  300% center; }
 }
 .logo-shimmer {
   background: linear-gradient(90deg,
@@ -123,8 +273,8 @@
 }
 
 @keyframes onlinePing {
-  0%,100% { transform: scale(1); opacity: 0.8; }
-  50%      { transform: scale(2.5); opacity: 0; }
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50%       { transform: scale(2.5); opacity: 0; }
 }
 .online-ping { animation: onlinePing 1.8s ease-in-out infinite; }
 
@@ -134,56 +284,63 @@
   66%  { background-position: 0% 30%; }
   100% { background-position: 0% 0%; }
 }
-.sidebar-bg {
+/* Dark sidebar: animated deep purple gradient */
+.dark .sidebar-bg {
   background: linear-gradient(160deg,
     #3b0764 0%, #2e1065 12%, #1e0a5e 28%,
     #0f0a2e 50%, #180833 70%, #2d1055 88%, #3b0764 100%);
   background-size: 100% 300%;
   animation: sidebarGradShift 12s ease-in-out infinite;
 }
+/* Light sidebar: soft violet/indigo gradient, no animation */
+html:not(.dark) .sidebar-bg {
+  background: linear-gradient(160deg,
+    #f5f3ff 0%, #ede9fe 25%, #ddd6fe 55%, #ede9fe 80%, #f5f3ff 100%);
+  animation: none;
+}
 
 /* ─── Card interactions ──────────────────────────────────────────────────────── */
-.card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-  backdrop-filter: blur(8px);
-}
 .card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.35) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18) !important;
 }
+.dark .card:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.38) !important;
+}
+.card { backdrop-filter: blur(8px); }
 
 /* ─── Water background animation ────────────────────────────────────────────── */
 @keyframes waterFloat1 {
-  0%,100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
-  20%      { transform: translate(9%, 8%) scale(1.15) rotate(3deg); }
-  50%      { transform: translate(4%, 15%) scale(0.92) rotate(-2deg); }
-  75%      { transform: translate(-8%, 5%) scale(1.08) rotate(4deg); }
+  0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
+  20%       { transform: translate(9%, 8%) scale(1.15) rotate(3deg); }
+  50%       { transform: translate(4%, 15%) scale(0.92) rotate(-2deg); }
+  75%       { transform: translate(-8%, 5%) scale(1.08) rotate(4deg); }
 }
 @keyframes waterFloat2 {
-  0%,100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
-  25%      { transform: translate(-12%, -7%) scale(1.18) rotate(-5deg); }
-  60%      { transform: translate(8%, -12%) scale(0.88) rotate(3deg); }
-  80%      { transform: translate(-5%, 6%) scale(1.1) rotate(-2deg); }
+  0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
+  25%       { transform: translate(-12%, -7%) scale(1.18) rotate(-5deg); }
+  60%       { transform: translate(8%, -12%) scale(0.88) rotate(3deg); }
+  80%       { transform: translate(-5%, 6%) scale(1.1) rotate(-2deg); }
 }
 @keyframes waterFloat3 {
-  0%,100% { transform: translate(0%, 0%) scale(1); }
-  30%      { transform: translate(7%, 12%) scale(1.12); }
-  65%      { transform: translate(-6%, -8%) scale(1.18); }
-  85%      { transform: translate(4%, 4%) scale(0.93); }
+  0%, 100% { transform: translate(0%, 0%) scale(1); }
+  30%       { transform: translate(7%, 12%) scale(1.12); }
+  65%       { transform: translate(-6%, -8%) scale(1.18); }
+  85%       { transform: translate(4%, 4%) scale(0.93); }
 }
 @keyframes waterFloat4 {
-  0%,100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
-  35%      { transform: translate(14%, -6%) scale(0.87) rotate(6deg); }
-  70%      { transform: translate(-5%, 10%) scale(1.1) rotate(-4deg); }
+  0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
+  35%       { transform: translate(14%, -6%) scale(0.87) rotate(6deg); }
+  70%       { transform: translate(-5%, 10%) scale(1.1) rotate(-4deg); }
 }
 @keyframes waterFloat5 {
-  0%,100% { transform: translate(0%, 0%) scale(1); }
-  40%      { transform: translate(-10%, -14%) scale(1.2); }
-  75%      { transform: translate(8%, 6%) scale(0.9); }
+  0%, 100% { transform: translate(0%, 0%) scale(1); }
+  40%       { transform: translate(-10%, -14%) scale(1.2); }
+  75%       { transform: translate(8%, 6%) scale(0.9); }
 }
 @keyframes waterPulse {
-  0%,100% { opacity: 0.5; }
-  50%      { opacity: 0.95; }
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 0.95; }
 }
 @keyframes waterRipple {
   0%   { transform: scale(0.8); opacity: 0.8; }
@@ -229,6 +386,9 @@
   filter: blur(95px);
   animation: waterFloat5 30s ease-in-out infinite 12s, waterPulse 14s ease-in-out infinite 6s;
 }
+/* Hide decorative blobs in light mode */
+html:not(.dark) .water-blob { opacity: 0 !important; }
+
 @keyframes waterSurface {
   0%   { background-position: 0% 0%; }
   25%  { background-position: 100% 50%; }
@@ -238,10 +398,8 @@
 }
 .water-surface {
   background: linear-gradient(135deg,
-    rgba(20,5,60,0.4) 0%,
-    rgba(40,10,90,0.25) 25%,
-    rgba(10,0,50,0.35) 50%,
-    rgba(30,5,80,0.2) 75%,
+    rgba(20,5,60,0.4) 0%, rgba(40,10,90,0.25) 25%,
+    rgba(10,0,50,0.35) 50%, rgba(30,5,80,0.2) 75%,
     rgba(15,0,55,0.3) 100%);
   background-size: 400% 400%;
   animation: waterSurface 22s ease infinite;
@@ -257,3 +415,62 @@
   pointer-events: none;
   animation: rippleExpand 6s ease-out infinite;
 }
+
+/* ─── Recharts theme awareness ───────────────────────────────────────────────── */
+html:not(.dark) .recharts-text tspan { fill: var(--text-muted); }
+.dark .recharts-text tspan { fill: #64748b; }
+
+/* ─── Light-mode overrides for semantically-dark inline Tailwind classes ──────
+   These remap "light-on-dark" Tailwind shades to their "dark-on-light" equivalents
+   without needing to touch every JSX file.                                         */
+
+/* Text */
+html:not(.dark) .text-slate-100 { color: var(--text-primary)   !important; }
+html:not(.dark) .text-slate-200 { color: var(--text-secondary) !important; }
+html:not(.dark) .text-slate-300 { color: var(--text-tertiary)  !important; }
+
+/* Transparent-white bg → transparent-black bg */
+html:not(.dark) .bg-white\/3  { background-color: rgba(0,0,0,0.02) !important; }
+html:not(.dark) .bg-white\/4  { background-color: rgba(0,0,0,0.03) !important; }
+html:not(.dark) .bg-white\/5  { background-color: rgba(0,0,0,0.04) !important; }
+html:not(.dark) .bg-white\/8  { background-color: rgba(0,0,0,0.05) !important; }
+html:not(.dark) .bg-white\/10 { background-color: rgba(0,0,0,0.06) !important; }
+html:not(.dark) .bg-white\/12 { background-color: rgba(0,0,0,0.07) !important; }
+html:not(.dark) .bg-white\/15 { background-color: rgba(0,0,0,0.09) !important; }
+
+/* Hover state transparent-white bg */
+html:not(.dark) .hover\:bg-white\/8:hover  { background-color: rgba(0,0,0,0.04) !important; }
+html:not(.dark) .hover\:bg-white\/10:hover { background-color: rgba(0,0,0,0.05) !important; }
+html:not(.dark) .hover\:bg-white\/15:hover { background-color: rgba(0,0,0,0.07) !important; }
+
+/* Transparent-white borders */
+html:not(.dark) .border-white\/6  { border-color: rgba(0,0,0,0.06) !important; }
+html:not(.dark) .border-white\/8  { border-color: rgba(0,0,0,0.08) !important; }
+html:not(.dark) .border-white\/10 { border-color: rgba(0,0,0,0.10) !important; }
+html:not(.dark) .border-white\/12 { border-color: rgba(0,0,0,0.08) !important; }
+html:not(.dark) .border-white\/15 { border-color: rgba(0,0,0,0.10) !important; }
+
+/* Dark violet table row hover */
+html:not(.dark) .bg-violet-900\/25             { background-color: rgba(109,40,217,0.05) !important; }
+html:not(.dark) .hover\:bg-violet-900\/20:hover { background-color: rgba(109,40,217,0.05) !important; }
+
+/* Ticket card hover in UserDashboard */
+html:not(.dark) .hover\:bg-violet-500\/30:hover  { background-color: rgba(139,92,246,0.12) !important; }
+html:not(.dark) .hover\:border-violet-500\/30:hover { border-color: rgba(139,92,246,0.3)  !important; }
+
+/* History timeline line */
+html:not(.dark) .bg-white\/15 { background-color: rgba(0,0,0,0.10) !important; }
+
+/* Online indicator border — adapts to surface color */
+html:not(.dark) .border-\[\#080c14\] { border-color: var(--bg-surface)  !important; }
+html:not(.dark) .border-\[\#1a0a4e\] { border-color: var(--bg-elevated) !important; }
+
+/* Dark hardcoded surface bg used in loading overlay */
+html:not(.dark) .bg-\[\#111827\]\/60 { background-color: rgba(248,250,252,0.85) !important; }
+
+/* Date picker color-scheme override for light mode */
+html:not(.dark) .\[color-scheme\:dark\] { color-scheme: light !important; }
+
+/* Hardcoded dark surface (e.g. history timeline dot bg) */
+html:not(.dark) .bg-\[\#111827\] { background-color: var(--bg-elevated) !important; }
+html:not(.dark) .border-white\/20 { border-color: rgba(0,0,0,0.12) !important; }

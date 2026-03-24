@@ -10,9 +10,9 @@ export default function Layout() {
   usePushNotifications()
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#080c14]">
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--bg-base)' }}>
 
-      {/* Animated background blobs behind content */}
+      {/* Animated background blobs — only visible in dark mode (hidden via CSS) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="water-blob water-blob-1" style={{ opacity: 0.35 }} />
         <div className="water-blob water-blob-3" style={{ opacity: 0.25 }} />
@@ -49,8 +49,11 @@ export default function Layout() {
           </div>
         </main>
 
-        <footer className="relative z-10 border-t border-white/8 py-2.5 px-6 flex-shrink-0">
-          <p className="text-center text-xs text-slate-500">
+        <footer
+          className="relative z-10 py-2.5 px-6 flex-shrink-0"
+          style={{ borderTop: '1px solid var(--border-default)' }}
+        >
+          <p className="text-center text-xs" style={{ color: 'var(--text-muted)' }}>
             © 2026 GLD S.A. &nbsp;|&nbsp; BI & DATA
           </p>
         </footer>

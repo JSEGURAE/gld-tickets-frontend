@@ -89,10 +89,10 @@ export default function CreateTicket() {
   }
 
   const priorityConfig = {
-    LOW:      { active: 'bg-slate-600 border-slate-600 text-white',      idle: 'border-slate-300 text-slate-600 hover:bg-slate-50' },
-    MEDIUM:   { active: 'bg-cyan-600 border-cyan-600 text-white',        idle: 'border-cyan-300 text-cyan-700 hover:bg-cyan-50' },
-    HIGH:     { active: 'bg-orange-500 border-orange-500 text-white',    idle: 'border-orange-300 text-orange-600 hover:bg-orange-50' },
-    CRITICAL: { active: 'bg-rose-600 border-rose-600 text-white',        idle: 'border-rose-300 text-rose-600 hover:bg-rose-50' },
+    LOW:      { active: 'bg-slate-600 border-slate-600 text-white',   idle: 'dark:border-slate-500/50 border-slate-300 dark:text-slate-300 text-slate-600 dark:hover:bg-slate-500/10 hover:bg-slate-50' },
+    MEDIUM:   { active: 'bg-cyan-600 border-cyan-600 text-white',     idle: 'dark:border-cyan-500/50 border-cyan-300 dark:text-cyan-400 text-cyan-700 dark:hover:bg-cyan-500/10 hover:bg-cyan-50' },
+    HIGH:     { active: 'bg-orange-500 border-orange-500 text-white', idle: 'dark:border-orange-500/50 border-orange-300 dark:text-orange-400 text-orange-600 dark:hover:bg-orange-500/10 hover:bg-orange-50' },
+    CRITICAL: { active: 'bg-rose-600 border-rose-600 text-white',     idle: 'dark:border-rose-500/50 border-rose-300 dark:text-rose-400 text-rose-600 dark:hover:bg-rose-500/10 hover:bg-rose-50' },
   }
 
   return (
@@ -125,7 +125,7 @@ export default function CreateTicket() {
               maxLength={200}
               required
             />
-            <p className="text-xs text-gray-400 mt-1 text-right">{form.title.length}/200</p>
+            <p className="text-xs mt-1 text-right" style={{ color: 'var(--text-muted)' }}>{form.title.length}/200</p>
           </div>
 
           {/* Remote ID */}
@@ -172,7 +172,7 @@ export default function CreateTicket() {
                     type="button"
                     onClick={() => setForm(f => ({ ...f, priority: p }))}
                     className={`px-3 py-2.5 text-sm font-semibold border-2 rounded-xl transition-all duration-150 active:scale-95 ${
-                      isActive ? cfg.active : `bg-white ${cfg.idle}`
+                      isActive ? cfg.active : `dark:bg-transparent bg-white ${cfg.idle}`
                     }`}
                   >
                     {PRIORITY_LABELS[p]}
@@ -193,10 +193,10 @@ export default function CreateTicket() {
             <div
               className={`relative border-2 border-dashed rounded-xl transition-all duration-200 ${
                 dragging
-                  ? 'border-violet-400 bg-violet-50 scale-[1.01]'
+                  ? 'border-violet-400 dark:bg-violet-500/10 bg-violet-50 scale-[1.01]'
                   : file
-                    ? 'border-violet-300 bg-violet-50/50'
-                    : 'border-gray-300 hover:border-violet-400 hover:bg-violet-50/30 cursor-pointer'
+                    ? 'border-violet-300 dark:bg-violet-500/8 bg-violet-50/50'
+                    : 'dark:border-white/15 border-gray-300 dark:hover:border-violet-400 hover:border-violet-400 dark:hover:bg-violet-500/8 hover:bg-violet-50/30 cursor-pointer'
               }`}
               onClick={() => !file && fileInputRef.current?.click()}
               onDragOver={e => { e.preventDefault(); setDragging(true) }}
@@ -210,7 +210,7 @@ export default function CreateTicket() {
                       <img src={preview} alt="Vista previa" className="max-h-52 rounded-lg object-contain shadow-sm" />
                     </div>
                   ) : (
-                    <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-xl dark:bg-white/8 bg-gray-100 flex items-center justify-center">
                       {getFileIcon(file)}
                     </div>
                   )}
@@ -223,14 +223,14 @@ export default function CreateTicket() {
                 </div>
               ) : (
                 <div className="p-8 text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                    <Upload className="w-6 h-6 text-gray-400" />
+                  <div className="w-12 h-12 rounded-2xl dark:bg-white/8 bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                    <Upload className="w-6 h-6" style={{ color: 'var(--text-muted)' }} />
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
                     Arrastra un archivo aquí o{' '}
-                    <span className="text-violet-600 font-semibold">selecciona un archivo</span>
+                    <span className="text-violet-600 dark:text-violet-400 font-semibold">selecciona un archivo</span>
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">PNG, JPG, PDF, Excel, Word — hasta 10 MB</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>PNG, JPG, PDF, Excel, Word — hasta 10 MB</p>
                 </div>
               )}
 
@@ -245,7 +245,7 @@ export default function CreateTicket() {
           </div>
 
           {error && (
-            <div className="bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 text-sm text-rose-700">
+            <div className="dark:bg-rose-500/15 bg-rose-50 dark:border-rose-500/30 border border-rose-200 rounded-xl px-4 py-3 text-sm dark:text-rose-300 text-rose-700">
               {error}
             </div>
           )}

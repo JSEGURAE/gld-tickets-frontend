@@ -135,13 +135,15 @@ function UserDashboard({ user }) {
               <input
                 type="date" value={dateFrom}
                 onChange={e => { setDateFrom(e.target.value); setActivePreset(null) }}
-                className="bg-transparent text-xs text-slate-300 outline-none [color-scheme:dark] cursor-pointer"
+                className="bg-transparent text-xs outline-none cursor-pointer"
+                style={{ colorScheme: 'inherit', color: 'var(--text-tertiary)' }}
               />
-              <span className="text-slate-500 text-xs">→</span>
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>→</span>
               <input
                 type="date" value={dateTo}
                 onChange={e => { setDateTo(e.target.value); setActivePreset(null) }}
-                className="bg-transparent text-xs text-slate-300 outline-none [color-scheme:dark] cursor-pointer"
+                className="bg-transparent text-xs outline-none cursor-pointer"
+                style={{ colorScheme: 'inherit', color: 'var(--text-tertiary)' }}
               />
               <button onClick={handleApply}
                 className="ml-1 px-2 py-0.5 bg-violet-600 hover:bg-violet-500 text-white text-xs rounded-md font-medium transition-colors">
@@ -154,23 +156,30 @@ function UserDashboard({ user }) {
         {/* Chart */}
         <div className="relative">
           {chartLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#111827]/60 rounded-lg z-10">
+            <div className="absolute inset-0 flex items-center justify-center rounded-lg z-10"
+              style={{ backgroundColor: 'var(--bg-surface)', opacity: 0.8 }}>
               <Loader2 className="w-5 h-5 animate-spin text-violet-400" />
             </div>
           )}
           <ResponsiveContainer width="100%" height={150}>
             <BarChart data={monthly} margin={{ top: 18, right: 8, left: -20, bottom: 0 }}>
-              <XAxis dataKey="mes" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis allowDecimals={false} tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="mes" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
               <Tooltip
-                cursor={{ fill: 'rgba(139,92,246,0.1)' }}
-                contentStyle={{ background: '#1e1b2e', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 8, fontSize: 12 }}
-                labelStyle={{ color: '#c4b5fd' }}
-                itemStyle={{ color: '#e2e8f0' }}
+                cursor={{ fill: 'rgba(139,92,246,0.08)' }}
+                contentStyle={{
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid rgba(139,92,246,0.3)',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  color: 'var(--text-secondary)',
+                }}
+                labelStyle={{ color: '#8b5cf6' }}
+                itemStyle={{ color: 'var(--text-secondary)' }}
                 formatter={(v) => [v, 'Tickets']}
               />
               <Bar dataKey="total" fill="#8b5cf6" radius={[4, 4, 0, 0]}
-                label={{ position: 'top', fill: '#a78bfa', fontSize: 11, fontWeight: 600,
+                label={{ position: 'top', fill: '#8b5cf6', fontSize: 11, fontWeight: 600,
                   formatter: (v) => v > 0 ? v : '' }} />
             </BarChart>
           </ResponsiveContainer>

@@ -24,13 +24,13 @@ export function PriorityBadge({ priority }) {
 
 export function RoleBadge({ role }) {
   const styles = {
-    USER:       'bg-slate-100 text-slate-700',
-    TECHNICIAN: 'bg-indigo-100 text-indigo-700',
-    ADMIN:      'bg-violet-100 text-violet-700',
+    USER:       'dark:bg-slate-500/15 bg-slate-100 dark:text-slate-300 text-slate-700',
+    TECHNICIAN: 'dark:bg-indigo-500/15 bg-indigo-100 dark:text-indigo-300 text-indigo-700',
+    ADMIN:      'dark:bg-violet-500/15 bg-violet-100 dark:text-violet-300 text-violet-700',
   }
   const labels = { USER: 'Usuario', TECHNICIAN: 'Técnico', ADMIN: 'Admin' }
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full ${styles[role] || 'bg-gray-100 text-gray-700'}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full ${styles[role] || 'dark:bg-slate-500/15 bg-gray-100 dark:text-slate-300 text-gray-700'}`}>
       {labels[role] || role}
     </span>
   )

@@ -33,14 +33,24 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
       />
 
       {/* Dialog */}
-      <div className={`relative w-full ${sizes[size]} rounded-2xl shadow-2xl animate-fade-in`}
-        style={{ background: 'rgba(17,24,39,0.98)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(16px)' }}>
+      <div
+        className={`relative w-full ${sizes[size]} rounded-2xl shadow-2xl animate-fade-in`}
+        style={{
+          background: 'var(--modal-bg)',
+          border: '1px solid var(--border-default)',
+          backdropFilter: 'blur(16px)',
+        }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/8">
-          <h2 className="text-lg font-semibold text-slate-100">{title}</h2>
+        <div
+          className="flex items-center justify-between px-6 py-4"
+          style={{ borderBottom: '1px solid var(--border-default)' }}
+        >
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</h2>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-white/10 rounded-lg transition-colors"
+            className="p-1.5 rounded-lg transition-colors btn-ghost"
+            aria-label="Cerrar"
           >
             <X className="w-5 h-5" />
           </button>
