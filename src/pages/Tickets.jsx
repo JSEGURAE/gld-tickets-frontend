@@ -10,7 +10,7 @@ import { timeAgo, STATUS_LABELS, PRIORITY_LABELS, STATUSES, PRIORITIES } from '.
 import useAuthStore from '../store/authStore'
 
 /* ── MultiSelect dropdown with checkboxes ──────────────────────────────────── */
-function MultiSelect({ options, selected, onChange, placeholder, renderOption }) {
+function MultiSelect({ options, selected, onChange, placeholder }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -20,14 +20,14 @@ function MultiSelect({ options, selected, onChange, placeholder, renderOption })
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  const allSelected = selected.length === options.length
+  const allSelected = options.length > 0 && selected.length === options.length
   const toggle = (value) =>
     onChange(selected.includes(value) ? selected.filter(v => v !== value) : [...selected, value])
   const toggleAll = () => onChange(allSelected ? [] : options.map(o => o.value))
 
   const label =
     selected.length === 0 ? placeholder :
-    selected.length === options.length ? 'Todos' :
+    allSelected ? 'Todos' :
     selected.length === 1 ? (options.find(o => o.value === selected[0])?.label ?? placeholder) :
     `${selected.length} seleccionados`
 
@@ -35,52 +35,98 @@ function MultiSelect({ options, selected, onChange, placeholder, renderOption })
 
   return (
     <div className="relative" ref={ref}>
+      {/* Trigger button */}
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className={`flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-lg border transition-all duration-150 w-full
-          ${hasActive
-            ? 'dark:border-violet-500/60 border-violet-400 dark:text-violet-300 text-violet-700 dark:bg-violet-500/10 bg-violet-50'
-            : 'dark:border-white/10 border-slate-200 dark:text-slate-300 text-slate-600 dark:bg-transparent bg-white dark:hover:border-white/20 hover:border-slate-300'
-          }`}
-        style={{ minWidth: '10rem' }}
+        className="flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-lg border transition-all duration-150"
+        style={{
+          minWidth: '10rem',
+          backgroundColor: hasActive ? 'rgba(139,92,246,0.08)' : 'var(--bg-input)',
+          borderColor: hasActive ? 'rgba(139,92,246,0.5)' : 'var(--border-default)',
+          color: hasActive ? '#8b5cf6' : 'var(--text-tertiary)',
+        }}
       >
         <span className="truncate">{label}</span>
-        <ChevronDown className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className="w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200"
+          style={{ transform: open ? 'rotate(180deg)' : 'none' }}
+        />
       </button>
 
+      {/* Dropdown */}
       {open && (
-        <div className="absolute top-full mt-1 left-0 z-50 w-52 rounded-xl border dark:border-white/10 border-slate-200 dark:bg-[#1a2035] bg-white shadow-xl animate-fade-in overflow-hidden">
+        <div
+          className="absolute top-full mt-1 left-0 w-56 rounded-xl shadow-xl animate-fade-in"
+          style={{
+            zIndex: 9999,
+            backgroundColor: 'var(--bg-surface)',
+            border: '1px solid var(--border-default)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+          }}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between px-3 py-2 border-b dark:border-white/8 border-slate-100">
-            <button type="button" onClick={toggleAll}
-              className="text-xs font-medium dark:text-violet-400 text-violet-600 hover:underline">
+          <div
+            className="flex items-center justify-between px-3 py-2.5"
+            style={{ borderBottom: '1px solid var(--border-default)' }}
+          >
+            <button
+              type="button"
+              onClick={toggleAll}
+              className="text-xs font-semibold hover:underline"
+              style={{ color: '#8b5cf6' }}
+            >
               {allSelected ? 'Limpiar todo' : 'Seleccionar todo'}
             </button>
             {hasActive && !allSelected && (
-              <button type="button" onClick={() => onChange([])}
-                className="text-xs dark:text-slate-500 text-slate-400 hover:underline">
+              <button
+                type="button"
+                onClick={() => onChange([])}
+                className="text-xs hover:underline"
+                style={{ color: 'var(--text-muted)' }}
+              >
                 Limpiar
               </button>
             )}
           </div>
-          {/* Options */}
-          <div className="py-1 max-h-60 overflow-y-auto">
+
+          {/* Options list */}
+          <div style={{ maxHeight: '220px', overflowY: 'auto' }}>
             {options.map(opt => {
               const isChecked = selected.includes(opt.value)
               return (
-                <label key={opt.value}
-                  className="flex items-center gap-2.5 px-3 py-2 cursor-pointer dark:hover:bg-white/5 hover:bg-slate-50 transition-colors">
-                  <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors
-                    ${isChecked
-                      ? 'bg-violet-500 border-violet-500'
-                      : 'dark:border-white/20 border-slate-300 dark:bg-transparent bg-white'}`}>
+                <label
+                  key={opt.value}
+                  className="flex items-center gap-2.5 px-3 py-2.5 cursor-pointer transition-colors"
+                  style={{ color: 'var(--text-secondary)' }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--interactive-hover)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  {/* Custom checkbox */}
+                  <span
+                    className="flex items-center justify-center flex-shrink-0 rounded transition-all"
+                    style={{
+                      width: 16, height: 16,
+                      backgroundColor: isChecked ? '#8b5cf6' : 'transparent',
+                      border: isChecked ? '2px solid #8b5cf6' : '2px solid var(--border-strong)',
+                    }}
+                  >
                     {isChecked && <Check className="w-2.5 h-2.5 text-white" />}
                   </span>
-                  <input type="checkbox" checked={isChecked} onChange={() => toggle(opt.value)} className="hidden" />
-                  {renderOption ? renderOption(opt) : (
-                    <span className="text-sm dark:text-slate-300 text-slate-700">{opt.label}</span>
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => toggle(opt.value)}
+                    className="hidden"
+                  />
+                  {/* Color dot (for status/priority) */}
+                  {opt.dot && (
+                    <span
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: opt.dot }}
+                    />
                   )}
+                  <span className="text-sm truncate">{opt.label}</span>
                 </label>
               )
             })}
@@ -155,8 +201,11 @@ export default function Tickets() {
   const clearFilters = () => setSearchParams({})
   const hasFilters = filters.status.length || filters.priority.length || filters.search || filters.assigneeId.length
 
-  const statusOptions  = STATUSES.map(s => ({ value: s, label: STATUS_LABELS[s] }))
-  const priorityOptions = PRIORITIES.map(p => ({ value: p, label: PRIORITY_LABELS[p] }))
+  const STATUS_DOTS = { NEW: '#94a3b8', IN_REVIEW: '#f59e0b', IN_PROGRESS: '#6366f1', IN_TESTING: '#8b5cf6', COMPLETED: '#10b981' }
+  const PRIORITY_DOTS = { LOW: '#64748b', MEDIUM: '#06b6d4', HIGH: '#f97316', CRITICAL: '#ef4444' }
+
+  const statusOptions   = STATUSES.map(s => ({ value: s, label: STATUS_LABELS[s], dot: STATUS_DOTS[s] }))
+  const priorityOptions = PRIORITIES.map(p => ({ value: p, label: PRIORITY_LABELS[p], dot: PRIORITY_DOTS[p] }))
   const assigneeOptions = technicians.map(t => ({ value: String(t.id), label: t.name }))
 
   return (
@@ -196,7 +245,6 @@ export default function Tickets() {
             selected={filters.status}
             onChange={vals => setFilter('status', vals)}
             placeholder="Todos los estados"
-            renderOption={opt => <StatusBadge status={opt.value} showDot />}
           />
 
           {/* Priority multi-select */}
@@ -205,7 +253,6 @@ export default function Tickets() {
             selected={filters.priority}
             onChange={vals => setFilter('priority', vals)}
             placeholder="Todas las prioridades"
-            renderOption={opt => <PriorityBadge priority={opt.value} />}
           />
 
           {/* Assignee multi-select */}
