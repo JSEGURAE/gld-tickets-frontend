@@ -225,7 +225,7 @@ export default function Tickets() {
       </div>
 
       {/* Filters */}
-      <div className="card p-4">
+      <div className="card p-4" style={{ position: 'relative', zIndex: 10 }}>
         <div className="flex flex-wrap gap-3 items-center">
           {/* Search */}
           <div className="relative flex-1 min-w-48">
