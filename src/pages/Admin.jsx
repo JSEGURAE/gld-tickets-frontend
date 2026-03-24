@@ -834,9 +834,16 @@ function SedesTab() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-violet-400" /> Sedes registradas
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-violet-400" /> Sedes registradas
+          </h2>
+          {!loading && (
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-500/20 text-violet-300 border border-violet-500/30">
+              {sedes.length} {sedes.length === 1 ? 'sede' : 'sedes'}
+            </span>
+          )}
+        </div>
         <button onClick={openCreate} className="btn-primary"><PlusCircle className="w-4 h-4" /> Nueva Sede</button>
       </div>
 
