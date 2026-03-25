@@ -11,6 +11,7 @@ import Tickets from './pages/Tickets'
 import TicketDetail from './pages/TicketDetail'
 import CreateTicket from './pages/CreateTicket'
 import Admin from './pages/Admin'
+import WorkFlow from './pages/WorkFlow'
 import useThemeStore from './store/themeStore'
 
 export default function App() {
@@ -30,6 +31,14 @@ export default function App() {
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/tickets/new" element={<CreateTicket />} />
           <Route path="/tickets/:id" element={<TicketDetail />} />
+          <Route
+            path="/workflow"
+            element={
+              <ProtectedRoute roles={['TECHNICIAN', 'ADMIN']}>
+                <WorkFlow />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/admin"
             element={

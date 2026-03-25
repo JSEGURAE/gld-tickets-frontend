@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Ticket, PlusCircle, List, Users,
-  ChevronDown, Zap, Tag, Bell, MapPin,
+  ChevronDown, Zap, Tag, Bell, MapPin, Kanban,
 } from 'lucide-react'
 import useAuthStore from '../store/authStore'
 import { getInitials, getAvatarColor, ROLE_LABELS } from '../utils/helpers'
@@ -120,6 +120,13 @@ export default function Sidebar({ onClose }) {
           <LayoutDashboard className="w-4 h-4 flex-shrink-0 transition-all duration-200 group-hover:scale-125 group-hover:rotate-6 group-hover:text-violet-400" />
           Dashboard
         </NavLink>
+
+        {(user?.role === 'TECHNICIAN' || user?.role === 'ADMIN') && (
+          <NavLink to="/workflow" className={mainLinkClass} onClick={onClose}>
+            <Kanban className="w-4 h-4 flex-shrink-0 transition-all duration-200 group-hover:scale-125 group-hover:rotate-6 group-hover:text-violet-400" />
+            WorkFlow
+          </NavLink>
+        )}
 
         {/* Tickets accordion */}
         <div>
