@@ -36,10 +36,10 @@ export default function TicketDetail() {
 
   // Comment
   const [commentText, setCommentText] = useState('')
-  const [commentFile, setCommentFile] = useState(null)
-  const [commentPreview, setCommentPreview] = useState(null)
+  const [commentFiles, setCommentFiles] = useState([])
   const [commentFileError, setCommentFileError] = useState('')
   const [commentLoading, setCommentLoading] = useState(false)
+  const [isDragOver, setIsDragOver] = useState(false)
   const commentFileRef = useRef(null)
 
   const COMMENT_ALLOWED_TYPES = [
@@ -51,41 +51,53 @@ export default function TicketDetail() {
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   ]
 
-  const handleCommentFile = (f) => {
-    if (!f) return
-    if (!COMMENT_ALLOWED_TYPES.includes(f.type)) {
-      setCommentFileError('Tipo no permitido. Use imágenes, PDF, Excel o Word.')
-      return
-    }
-    if (f.size > 10 * 1024 * 1024) {
-      setCommentFileError('El archivo no puede superar los 10 MB.')
-      return
-    }
+  const addCommentFiles = (newFiles) => {
     setCommentFileError('')
-    setCommentFile(f)
-    setCommentPreview(f.type.startsWith('image/') ? URL.createObjectURL(f) : null)
+    const valid = []
+    for (const f of Array.from(newFiles)) {
+      if (!COMMENT_ALLOWED_TYPES.includes(f.type)) {
+        setCommentFileError('Tipo no permitido. Use imágenes, PDF, Excel o Word.')
+        continue
+      }
+      if (f.size > 10 * 1024 * 1024) {
+        setCommentFileError('Cada archivo no puede superar los 10 MB.')
+        continue
+      }
+      valid.push({ file: f, preview: f.type.startsWith('image/') ? URL.createObjectURL(f) : null, id: Math.random().toString(36).slice(2) })
+    }
+    setCommentFiles(prev => {
+      const combined = [...prev, ...valid]
+      return combined.slice(0, 5) // max 5 files
+    })
   }
 
-  const removeCommentFile = () => {
-    if (commentPreview) URL.revokeObjectURL(commentPreview)
-    setCommentFile(null)
-    setCommentPreview(null)
-    setCommentFileError('')
+  const removeCommentFile = (fileId) => {
+    setCommentFiles(prev => {
+      const f = prev.find(x => x.id === fileId)
+      if (f?.preview) URL.revokeObjectURL(f.preview)
+      return prev.filter(x => x.id !== fileId)
+    })
+  }
+
+  const clearCommentFiles = () => {
+    commentFiles.forEach(f => { if (f.preview) URL.revokeObjectURL(f.preview) })
+    setCommentFiles([])
     if (commentFileRef.current) commentFileRef.current.value = ''
   }
 
   const handleCommentPaste = (e) => {
     const items = e.clipboardData?.items
     if (!items) return
+    const files = []
     for (const item of items) {
       if (item.kind === 'file') {
         const f = item.getAsFile()
-        if (f) {
-          e.preventDefault()
-          handleCommentFile(f)
-          return
-        }
+        if (f) files.push(f)
       }
+    }
+    if (files.length > 0) {
+      e.preventDefault()
+      addCommentFiles(files)
     }
   }
 
@@ -199,9 +211,9 @@ export default function TicketDetail() {
     if (!commentText.trim()) return
     setCommentLoading(true)
     try {
-      await addComment(id, commentText, commentFile)
+      await addComment(id, commentText, commentFiles.map(f => f.file))
       setCommentText('')
-      removeCommentFile()
+      clearCommentFiles()
       await refresh()
     } catch (err) {
       setError(err.response?.data?.error || 'Error al agregar comentario')
@@ -277,7 +289,7 @@ export default function TicketDetail() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-start gap-3">
-          <button onClick={() => navigate('/tickets')} className="btn-ghost p-2 mt-0.5">
+          <button onClick={() => navigate(-1)} className="btn-ghost p-2 mt-0.5">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
@@ -352,7 +364,32 @@ export default function TicketDetail() {
                     </div>
                     <div className="bg-white/5 rounded-lg px-3 py-2.5 text-sm text-slate-300 leading-relaxed">
                       {comment.content}
-                      {comment.attachmentUrl && (
+                      {/* New multi-attachment system */}
+                      {(comment.attachments?.length > 0) && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {comment.attachments.map(att => {
+                            const isImg = att.mimeType?.startsWith('image/')
+                            return (
+                              <a
+                                key={att.id}
+                                href={att.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs transition-colors dark:bg-white/8 bg-slate-100 dark:hover:bg-white/12 hover:bg-slate-200 dark:text-slate-300 text-slate-600"
+                              >
+                                {isImg
+                                  ? <img src={att.url} alt={att.name} className="h-8 w-8 object-cover rounded" />
+                                  : getCommentFileIcon(att.name)
+                                }
+                                <span className="max-w-[120px] truncate">{att.name}</span>
+                                <ExternalLink className="w-3 h-3 flex-shrink-0 opacity-50" />
+                              </a>
+                            )
+                          })}
+                        </div>
+                      )}
+                      {/* Legacy single attachment (backward compat) */}
+                      {(!comment.attachments?.length && comment.attachmentUrl) && (
                         <a
                           href={comment.attachmentUrl}
                           target="_blank"
@@ -375,7 +412,12 @@ export default function TicketDetail() {
                   {getInitials(user?.name)}
                 </div>
                 <div className="flex-1">
-                  <div className="relative">
+                  <div
+                    className={`relative rounded-xl transition-colors ${isDragOver ? 'ring-2 ring-violet-500 ring-offset-1 dark:ring-offset-gray-900' : ''}`}
+                    onDragOver={e => { e.preventDefault(); setIsDragOver(true) }}
+                    onDragLeave={() => setIsDragOver(false)}
+                    onDrop={e => { e.preventDefault(); setIsDragOver(false); addCommentFiles(e.dataTransfer.files) }}
+                  >
                     <textarea
                       className="textarea pr-12"
                       rows={3}
@@ -393,23 +435,27 @@ export default function TicketDetail() {
                     </button>
                   </div>
 
-                  {/* File preview */}
-                  {commentFile && (
-                    <div className="mt-2 flex items-center gap-3 p-2.5 rounded-lg dark:bg-white/5 bg-slate-100 border dark:border-white/10 border-slate-200">
-                      {commentPreview ? (
-                        <img src={commentPreview} alt="preview" className="h-14 w-14 object-cover rounded-md flex-shrink-0 border dark:border-white/10 border-slate-200" />
-                      ) : (
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 dark:bg-white/10 bg-slate-200">
-                          {getCommentFileIcon(commentFile.name)}
+                  {/* Multi-file preview */}
+                  {commentFiles.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {commentFiles.map(cf => (
+                        <div key={cf.id} className="relative group flex items-center gap-2 p-2 rounded-lg dark:bg-white/5 bg-slate-100 border dark:border-white/10 border-slate-200">
+                          {cf.preview ? (
+                            <img src={cf.preview} alt={cf.file.name} className="h-12 w-12 object-cover rounded-md flex-shrink-0 border dark:border-white/10 border-slate-200" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 dark:bg-white/10 bg-slate-200">
+                              {getCommentFileIcon(cf.file.name)}
+                            </div>
+                          )}
+                          <div className="min-w-0 max-w-[100px]">
+                            <p className="text-xs font-medium dark:text-slate-300 text-slate-700 truncate">{cf.file.name}</p>
+                            <p className="text-xs dark:text-slate-500 text-slate-400">{(cf.file.size / 1024).toFixed(0)} KB</p>
+                          </div>
+                          <button type="button" onClick={() => removeCommentFile(cf.id)} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <XIcon className="w-3 h-3" />
+                          </button>
                         </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium dark:text-slate-300 text-slate-700 truncate">{commentFile.name}</p>
-                        <p className="text-xs dark:text-slate-500 text-slate-400">{(commentFile.size / 1024).toFixed(0)} KB</p>
-                      </div>
-                      <button type="button" onClick={removeCommentFile} className="text-rose-400 hover:text-rose-500 flex-shrink-0 transition-colors">
-                        <XIcon className="w-4 h-4" />
-                      </button>
+                      ))}
                     </div>
                   )}
 
@@ -419,21 +465,22 @@ export default function TicketDetail() {
                   )}
 
                   {/* Attach row */}
-                  <div className="mt-2 flex items-center gap-2">
+                  <div className="mt-2 flex items-center gap-2 flex-wrap">
                     <button
                       type="button"
                       onClick={() => commentFileRef.current?.click()}
                       className="flex items-center gap-1.5 text-xs dark:text-slate-400 text-slate-500 dark:hover:text-violet-400 hover:text-violet-600 transition-colors"
                     >
                       <Paperclip className="w-3.5 h-3.5" />
-                      Adjuntar archivo
+                      {commentFiles.length > 0 ? `${commentFiles.length} archivo(s)` : 'Adjuntar archivos'}
                     </button>
-                    <span className="text-xs dark:text-slate-600 text-slate-400">· Ctrl+V para pegar</span>
+                    <span className="text-xs dark:text-slate-600 text-slate-400">· Ctrl+V · máx. 5 archivos, 10 MB c/u</span>
                     <input
                       ref={commentFileRef}
                       type="file"
                       accept="image/*,application/pdf,.xlsx,.xls,.docx,.doc"
-                      onChange={e => handleCommentFile(e.target.files[0] || null)}
+                      multiple
+                      onChange={e => { addCommentFiles(e.target.files); if (commentFileRef.current) commentFileRef.current.value = '' }}
                       className="hidden"
                     />
                   </div>

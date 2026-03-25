@@ -25,14 +25,14 @@ export const tagSupervisor = (ticketId, supervisorId) =>
 export const untagSupervisor = (ticketId, supervisorId) =>
   client.delete(`/tickets/${ticketId}/supervisors/${supervisorId}`).then(r => r.data)
 
-export const addComment = (ticketId, content, file) => {
-  if (file) {
-    const fd = new FormData()
-    fd.append('content', content)
-    fd.append('attachment', file)
-    return client.post(`/tickets/${ticketId}/comments`, fd, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data)
-  }
-  return client.post(`/tickets/${ticketId}/comments`, { content }).then(r => r.data)
+export const addComment = (ticketId, content, files = []) => {
+  const fd = new FormData()
+  fd.append('content', content)
+  const fileArray = Array.isArray(files) ? files : (files ? [files] : [])
+  fileArray.forEach(f => fd.append('attachments', f))
+  return client.post(`/tickets/${ticketId}/comments`, fd, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }).then(r => r.data)
 }
 
 export const deleteComment = (ticketId, commentId) =>

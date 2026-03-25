@@ -179,6 +179,24 @@ export default function Tickets() {
 
   useEffect(() => { fetchTickets() }, [fetchTickets])
 
+  // Persist filters to sessionStorage whenever they change
+  const didRestoreRef = useRef(false)
+  useEffect(() => {
+    const qs = searchParams.toString()
+    if (qs) sessionStorage.setItem('tickets-filters', qs)
+    else sessionStorage.removeItem('tickets-filters')
+  }, [searchParams])
+
+  // On first mount, restore from sessionStorage if URL has no params
+  useEffect(() => {
+    if (didRestoreRef.current) return
+    didRestoreRef.current = true
+    if (!searchParams.toString()) {
+      const saved = sessionStorage.getItem('tickets-filters')
+      if (saved) setSearchParams(new URLSearchParams(saved), { replace: true })
+    }
+  }, [])
+
   const setFilter = (key, values) => {
     const params = new URLSearchParams(searchParams)
     if (Array.isArray(values)) {
