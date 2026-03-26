@@ -629,6 +629,15 @@ export default function TicketDetail() {
                   </div>
                 </>
               )}
+              {ticket.remotePassword && (
+                <>
+                  <hr className="border-white/10" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Contraseña TeamViewer</span>
+                    <span className="font-mono text-sm font-medium text-violet-300">{ticket.remotePassword}</span>
+                  </div>
+                </>
+              )}
               <hr className="border-white/10" />
               <div>
                 <span className="text-gray-500 flex items-center gap-1">
