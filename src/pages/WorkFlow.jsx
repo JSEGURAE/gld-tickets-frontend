@@ -160,7 +160,7 @@ function TaskModal({ task, onClose, onSave, onChecklistUpdate }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-md rounded-2xl shadow-2xl animate-fade-in flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-xl rounded-2xl shadow-2xl animate-fade-in flex flex-col max-h-[90vh]"
         style={{ background: 'var(--modal-bg)', border: '1px solid var(--border-default)' }}
         onClick={e => e.stopPropagation()}
       >
