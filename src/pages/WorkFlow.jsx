@@ -951,7 +951,7 @@ export default function WorkFlow() {
       {view === 'kanban' && (
         <div onDragEnd={handleDragEnd}>
           {/* Board: Sin asignar | divider | 3 kanban columns */}
-          <div className="flex items-start gap-4 mb-4">
+          <div className="flex items-start gap-4 mb-4 -ml-4 sm:-ml-6">
             <UnassignedColumn
               tickets={unassignedTickets}
               onDragStart={handleDragStart}
