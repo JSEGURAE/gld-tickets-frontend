@@ -6,7 +6,7 @@ import {
   Calendar, Tag, GripVertical, ChevronDown,
 } from 'lucide-react'
 import useAuthStore from '../store/authStore'
-import { getWorkflow, createTask, updateTask, deleteTask, updateTicketStatus, addChecklistItem, updateChecklistItem, deleteChecklistItem } from '../api/workflow'
+import { getWorkflow, createTask, updateTask, deleteTask, updateTicketStatus, assignTicket, addChecklistItem, updateChecklistItem, deleteChecklistItem } from '../api/workflow'
 import { STATUS_LABELS, PRIORITY_LABELS, STATUS_STYLES, PRIORITY_STYLES, timeAgo } from '../utils/helpers'
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -363,7 +363,7 @@ function TaskModal({ task, onClose, onSave, onChecklistUpdate }) {
   )
 }
 
-// ── Delete Confirmation (inline) ─────────────────────────────────────────────
+// ── Delete Confirmation (inline) ───────────────��─────────────────────────────
 
 function DeleteConfirm({ onConfirm, onCancel }) {
   return (
@@ -414,7 +414,7 @@ function TicketCard({ ticket, isDragging, onDragStart }) {
           </span>
         )}
         <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-          {ticket.requestor.name} · {timeAgo(ticket.createdAt)}
+          {ticket.requestor.name} �� {timeAgo(ticket.createdAt)}
         </span>
       </div>
 
@@ -547,6 +547,43 @@ function TaskCard({ task, onEdit, onDelete, isDragging, onDragStart }) {
           />
         </div>
       )}
+    </div>
+  )
+}
+
+// ── Unassigned Column ────────────────────────────────────────────────────────
+
+function UnassignedColumn({ tickets, onDragStart }) {
+  return (
+    <div
+      className="flex flex-col rounded-2xl"
+      style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2.5 px-4 py-3.5" style={{ borderBottom: '1px solid var(--border-default)' }}>
+        <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+        <span className="text-xs font-bold uppercase tracking-wider dark:text-amber-300 text-amber-700">Sin asignar</span>
+        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold dark:bg-amber-500/10 bg-amber-50 dark:text-amber-300 text-amber-700">
+          {tickets.length}
+        </span>
+      </div>
+
+      {/* Cards */}
+      <div className="flex-1 p-3 space-y-2.5 overflow-y-auto" style={{ maxHeight: '520px' }}>
+        {tickets.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 gap-2">
+            <CheckCircle2 className="w-7 h-7 dark:text-slate-700 text-slate-300" />
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Sin tickets pendientes</span>
+          </div>
+        ) : tickets.map(ticket => (
+          <TicketCard
+            key={`unassigned-${ticket.id}`}
+            ticket={ticket}
+            isDragging={false}
+            onDragStart={e => onDragStart(e, { id: ticket.id, type: 'ticket', source: 'unassigned' })}
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -696,6 +733,7 @@ function KanbanColumn({ column, tickets, tasks, dragOverColumn, onDragStart, onD
 export default function WorkFlow() {
   const { user } = useAuthStore()
   const [tickets, setTickets] = useState([])
+  const [unassignedTickets, setUnassignedTickets] = useState([])
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -714,6 +752,7 @@ export default function WorkFlow() {
       const res = await getWorkflow()
       setTickets(res.data.tickets)
       setTasks(res.data.tasks)
+      setUnassignedTickets(res.data.unassignedTickets || [])
     } catch {
       setError('No se pudieron cargar los datos')
     } finally {
@@ -783,6 +822,11 @@ export default function WorkFlow() {
     let item
     try { item = JSON.parse(e.dataTransfer.getData('application/json')) } catch { return }
 
+    if (item.type === 'ticket' && item.source === 'unassigned') {
+      handleDropUnassigned(item.id, column)
+      return
+    }
+
     if (item.type === 'ticket') {
       const ticket = tickets.find(t => t.id === item.id)
       if (!ticket || ticket.status === column.onDropTicket) return
@@ -801,6 +845,18 @@ export default function WorkFlow() {
       setTasks(prev => prev.map(t => t.id === item.id ? { ...t, status: column.onDropTask, completedAt: column.onDropTask === 'DONE' ? new Date().toISOString() : null } : t))
       try { await updateTask(item.id, { status: column.onDropTask }) } catch { load() }
     }
+  }
+
+  // ── Handle drop of unassigned ticket onto a kanban column ─────────────────
+  const handleDropUnassigned = async (ticketId, column) => {
+    const ticket = unassignedTickets.find(t => t.id === ticketId)
+    if (!ticket) return
+    const newStatus = column.onDropTicket
+    setUnassignedTickets(prev => prev.filter(t => t.id !== ticketId))
+    setTickets(prev => [...prev, { ...ticket, status: newStatus, assigneeId: user.id }])
+    try {
+      await assignTicket(ticketId, user.id, newStatus)
+    } catch { load() }
   }
 
   // ── Derived data ───────────────────────────────────────────────────────────
@@ -894,32 +950,41 @@ export default function WorkFlow() {
       ══════════════════════════════════════════════════ */}
       {view === 'kanban' && (
         <div onDragEnd={handleDragEnd}>
-          {/* Active columns grid (3 cols, skip done) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            {COLUMNS.filter(c => c.id !== 'done').map(column => {
-              const { tickets: colTickets, tasks: colTasks } = getColumnItems(column)
-              return (
-                <KanbanColumn
-                  key={column.id}
-                  column={column}
-                  tickets={colTickets}
-                  tasks={colTasks}
-                  dragOverColumn={dragOverColumn}
-                  onDragStart={handleDragStart}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDragEnd={handleDragEnd}
-                  onDrop={handleDrop}
-                  onTicketStatus={(ticket, status) => {
-                    setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, status } : t))
-                    updateTicketStatus(ticket.id, status).catch(load)
-                  }}
-                  onEditTask={task => setEditingTask(task)}
-                  onDeleteTask={handleDeleteTask}
-                  onQuickAddTask={handleQuickAddTask}
-                />
-              )
-            })}
+          {/* Board: unassigned panel + active columns */}
+          <div className="grid grid-cols-1 lg:grid-cols-[260px,1fr] gap-4 mb-4 items-start">
+            {/* Left: Sin asignar */}
+            <UnassignedColumn
+              tickets={unassignedTickets}
+              onDragStart={handleDragStart}
+            />
+
+            {/* Right: Active columns (3 cols) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {COLUMNS.filter(c => c.id !== 'done').map(column => {
+                const { tickets: colTickets, tasks: colTasks } = getColumnItems(column)
+                return (
+                  <KanbanColumn
+                    key={column.id}
+                    column={column}
+                    tickets={colTickets}
+                    tasks={colTasks}
+                    dragOverColumn={dragOverColumn}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDragEnd={handleDragEnd}
+                    onDrop={handleDrop}
+                    onTicketStatus={(ticket, status) => {
+                      setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, status } : t))
+                      updateTicketStatus(ticket.id, status).catch(load)
+                    }}
+                    onEditTask={task => setEditingTask(task)}
+                    onDeleteTask={handleDeleteTask}
+                    onQuickAddTask={handleQuickAddTask}
+                  />
+                )
+              })}
+            </div>
           </div>
 
           {/* Completed column — collapsible */}
