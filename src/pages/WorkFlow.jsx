@@ -951,15 +951,17 @@ export default function WorkFlow() {
       {view === 'kanban' && (
         <div onDragEnd={handleDragEnd}>
           {/* Board: unassigned panel + active columns */}
-          <div className="grid grid-cols-1 lg:grid-cols-[260px,1fr] gap-4 mb-4 items-start">
-            {/* Left: Sin asignar */}
-            <UnassignedColumn
-              tickets={unassignedTickets}
-              onDragStart={handleDragStart}
-            />
+          <div className="flex gap-4 mb-4 items-start">
+            {/* Left: Sin asignar — fixed width */}
+            <div className="w-56 flex-shrink-0">
+              <UnassignedColumn
+                tickets={unassignedTickets}
+                onDragStart={handleDragStart}
+              />
+            </div>
 
-            {/* Right: Active columns (3 cols) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Right: Active columns — fill remaining space evenly */}
+            <div className="flex-1 grid grid-cols-3 gap-4">
               {COLUMNS.filter(c => c.id !== 'done').map(column => {
                 const { tickets: colTickets, tasks: colTasks } = getColumnItems(column)
                 return (
