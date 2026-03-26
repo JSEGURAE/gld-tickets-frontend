@@ -556,7 +556,7 @@ function TaskCard({ task, onEdit, onDelete, isDragging, onDragStart }) {
 function UnassignedColumn({ tickets, onDragStart }) {
   return (
     <div
-      className="flex flex-col rounded-2xl min-h-[480px]"
+      className="flex flex-col rounded-2xl min-h-[480px] w-60 flex-shrink-0"
       style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
     >
       {/* Header */}
@@ -950,36 +950,43 @@ export default function WorkFlow() {
       ══════════════════════════════════════════════════ */}
       {view === 'kanban' && (
         <div onDragEnd={handleDragEnd}>
-          {/* Board: 4-column grid — Sin asignar + 3 kanban columns */}
-          <div className="grid grid-cols-4 gap-4 mb-4">
+          {/* Board: Sin asignar | divider | 3 kanban columns */}
+          <div className="flex items-start gap-4 mb-4">
             <UnassignedColumn
               tickets={unassignedTickets}
               onDragStart={handleDragStart}
             />
-            {COLUMNS.filter(c => c.id !== 'done').map(column => {
-              const { tickets: colTickets, tasks: colTasks } = getColumnItems(column)
-              return (
-                <KanbanColumn
-                  key={column.id}
-                  column={column}
-                  tickets={colTickets}
-                  tasks={colTasks}
-                  dragOverColumn={dragOverColumn}
-                  onDragStart={handleDragStart}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDragEnd={handleDragEnd}
-                  onDrop={handleDrop}
-                  onTicketStatus={(ticket, status) => {
-                    setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, status } : t))
-                    updateTicketStatus(ticket.id, status).catch(load)
-                  }}
-                  onEditTask={task => setEditingTask(task)}
-                  onDeleteTask={handleDeleteTask}
-                  onQuickAddTask={handleQuickAddTask}
-                />
-              )
-            })}
+
+            {/* Vertical separator */}
+            <div className="self-stretch w-px flex-shrink-0 dark:bg-white/10 bg-slate-200 mx-1" />
+
+            {/* Kanban columns */}
+            <div className="flex-1 grid grid-cols-3 gap-4">
+              {COLUMNS.filter(c => c.id !== 'done').map(column => {
+                const { tickets: colTickets, tasks: colTasks } = getColumnItems(column)
+                return (
+                  <KanbanColumn
+                    key={column.id}
+                    column={column}
+                    tickets={colTickets}
+                    tasks={colTasks}
+                    dragOverColumn={dragOverColumn}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDragEnd={handleDragEnd}
+                    onDrop={handleDrop}
+                    onTicketStatus={(ticket, status) => {
+                      setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, status } : t))
+                      updateTicketStatus(ticket.id, status).catch(load)
+                    }}
+                    onEditTask={task => setEditingTask(task)}
+                    onDeleteTask={handleDeleteTask}
+                    onQuickAddTask={handleQuickAddTask}
+                  />
+                )
+              })}
+            </div>
           </div>
 
           {/* Completed column — collapsible */}
